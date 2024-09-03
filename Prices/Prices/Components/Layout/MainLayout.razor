@@ -1,23 +1,93 @@
 ﻿@inherits LayoutComponentBase
 
+<PageTitle>Prices</PageTitle>
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+    <AuthorizeView Policy="Users">
+        <Authorized>
+            <nav>
+                <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
+                    <MudFab Class="fixed ma-2 z-100" Style="right: 0px;" Color="Color.Transparent" Ripple="false" StartIcon="@Icons.Material.Filled.Menu" Size="Size.Small" OnClick="@(() => _drawerOpen = true)" />
+                    <MudDrawer @bind-Open="@_drawerOpen" Anchor="Anchor.Top" Elevation="1" Variant="@DrawerVariant.Temporary">
+                        <MudNavMenu Dense Color="Color.Dark" Class="px-4 my-2">
+                            <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeMode" />
+                        </MudNavMenu>
+                    </MudDrawer>
+                </MudHidden>
+                <MudHidden Breakpoint="Breakpoint.Xs">
+                    <MudAppBar Color="Color.Transparent" Dense Fixed="true">
+                        <MudGrid Class="align-center flex-nowrap" Spacing="0">
+                            <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeMode" />
+                        </MudGrid>
+                    </MudAppBar>
+                </MudHidden>
+            </nav>
+            <main>
+                <MudHidden Breakpoint="Breakpoint.Xs">
+                    <MudAppBar Color="Color.Transparent" Style="z-index:0;" Elevation="0" Dense Fixed="false">
+                        @*hidden spacer*@
+                    </MudAppBar>
+                </MudHidden>
+                <MudStack Row Class="px-4" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h5">@_sectionTitle</MudText>
+                    <SessionCounter />
+                </MudStack>
+                <article class="content px-4">
+                    <CascadingValue Value="@_filterText" Name="Filter">
+                        <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetSectionTitle))" Name="Section">
+                            @Body
+                        </CascadingValue>
+                    </CascadingValue>
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <main>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+@code {
+
+    /// <summary>テーマプロバイダへの参照</summary>
+    protected MudThemeProvider _mudThemeProvider = default!;
+    /// <summary>ダークモード</summary>
+    protected bool _isDarkMode;
+
+    /// <summary>モード切替ボタンが押された</summary>
+    protected void ChangeMode () => _isDarkMode = !_isDarkMode;
+
+    /// <summary>システムのテーマモードで初期化</summary>
+    protected override async Task OnAfterRenderAsync (bool firstRender) {
+        if (firstRender) {
+            _isDarkMode = await _mudThemeProvider.GetSystemPreference ();
+            StateHasChanged ();
+        }
+     }
+
+    /// <summary>ドロワーの状態</summary>
+    protected bool _drawerOpen = false;
+    /// <summary>セクションタイトル</summary>
+    protected string _sectionTitle = string.Empty;
+    /// <summary>検索文字列 (カスケーディングパラメータ)</summary>
+    protected string _filterText = string.Empty;
+
+    /// <summary>セクションタイトルが変更された</summary>
+    protected void SetSectionTitle (string title) {
+        _sectionTitle = title;
+    }
+
+    /// <summary>検索ボタンが押された</summary>
+    protected void SetFilterText (string text) {
+        _filterText = text;
+        _drawerOpen = false;
+    }
+}

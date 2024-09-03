@@ -4,11 +4,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>66d6d51e-cc30-4130-9460-7288e4d668b6</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Prices.Client\Prices.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
+    <PackageReference Include="MudBlazor" Version="7.7.0" />
+    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="PetaPoco.Compiled" Version="6.0.677" />
   </ItemGroup>
 
+  <Target Name="CustomAfterPublish" AfterTargets="Publish">
+    <Exec Command="powershell -File $(ProjectDir)deploy.ps1" Condition="Exists('$(ProjectDir)deploy.ps1')" />
+  </Target>
+  
 </Project>
