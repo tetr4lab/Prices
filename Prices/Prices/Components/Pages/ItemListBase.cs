@@ -39,6 +39,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
         // セッション数の変化を購読
         SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
+        _newItem = NewEditItem;
     }
 
     /// <summary>破棄</summary>
@@ -87,6 +88,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected virtual void Edit (object obj) {
         var item = GetT (obj);
         backupedItem = item.Clone ();
+        System.Diagnostics.Debug.WriteLine ($"Edit {backupedItem}");
     }
 
     /// <summary>編集完了</summary>
@@ -110,29 +112,32 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     //protected bool _canCancelEdit;
 
     /// <summary>項目追加</summary>
-    protected virtual async void AddItem () {
+    protected virtual async Task AddItem () {
         if (_isAdding || items == null) { return; }
         _isAdding = true;
         await StateHasChangedAsync ();
         if (EntityIsValid (_newItem)) {
             var result = await DataSet.AddAsync (_newItem);
             if (result.IsSuccess && _table != null) {
-                System.Diagnostics.Debug.WriteLine ($"Added {_newItem}");
                 await StateHasChangedAsync ();
                 _table.SetEditingItem (_newItem);
+                Edit (_newItem);
                 Snackbar.Add ($"{T.TableLabel}を追加しました。", Severity.Normal);
-                _newItem = new ();
+                _newItem = NewEditItem;
             }
         }
         _isAdding = false;
         StateHasChanged ();
     }
     protected bool _isAdding;
-    protected T _newItem = new ();
+    protected T _newItem = default!;
+
+    /// <summary>新規生成用の新規アイテム生成</summary>
+    protected virtual T NewEditItem => new ();
 
     /// <summary>項目削除</summary>
     /// <param name="obj"></param>
-    protected virtual async void DeleteItem (object obj) {
+    protected virtual async Task DeleteItem (object obj) {
         var item = GetT (obj);
         if (_table == null) { return; }
         // 確認ダイアログ

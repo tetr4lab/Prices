@@ -7,7 +7,7 @@ using MudBlazor;
 namespace Prices.Data;
 
 [TableName ("products")]
-public class Product : BaseModel<Product> {
+public class Product : BaseModel<Product>, IBaseModel {
     /// <inheritdoc/>
     public static string TableLabel => "製品";
 
@@ -26,6 +26,15 @@ public class Product : BaseModel<Product> {
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("category_id"), Required] public long CategoryId { get; set; } = 0;
     [Column ("unit"), StringLength (50)] public string? Unit { get; set; }
+
+    /// <summary>カテゴリ get</summary>
+    public Category? Category (PricesDataSet dataSet) => dataSet.Categories.Find (i => i.Id == CategoryId);
+
+    /// <summary>カテゴリ set</summary>
+    public Category Category (Category category) {
+        CategoryId = category.Id;
+        return category;
+    }
 
     /// <inheritdoc/>
     public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == Id);

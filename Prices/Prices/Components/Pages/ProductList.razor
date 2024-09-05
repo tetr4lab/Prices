@@ -1,0 +1,105 @@
+﻿@inherits ItemListBase<Product>
+
+@page "/products"
+
+<PageTitle>Prices Products</PageTitle>
+
+@if (DataSet.IsUnavailable) {
+    <MudAlert Severity="Severity.Error" Elevation="3">Unable to connect to any of the specified database management hosts.</MudAlert>
+} else if (!DataSet.IsReady || items == null) {
+    <MudProgressCircular Indeterminate="true" />
+} else {
+    if (items.Count > 0) {
+        <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
+                  SortLabel="⇅"
+                  AllowUnsorted="true"
+                  @bind-SelectedItem="selectedItem"
+                  CommitEditTooltip="保存"
+                  CancelEditTooltip="取消"
+                  RowEditPreview="Edit"
+                  RowEditCancel="Cancel"
+                  RowEditCommit="Commit"
+                  ReadOnly="false"
+                  CanCancelEdit="true"
+                  IsEditRowSwitchingBlocked="true"
+                  ApplyButtonPosition="TableApplyButtonPosition.End"
+                  EditButtonPosition="TableEditButtonPosition.End"
+                  EditTrigger="TableEditTrigger.EditButton">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Id)">@(Product.Label [nameof (Product.Id)])</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Category, string?>(x=>x.Name)">@(Product.Label [nameof (Product.CategoryId)])</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Name)">@(Product.Label [nameof (Product.Name)])</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label [nameof (Product.Unit)])</MudTableSortLabel></MudTh>
+                <MudTh>@(Product.Label [nameof (Product.Remarks)])</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Product.Label[nameof(Product.Id)])">@context.Id</MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.CategoryId)])">@(context.Category (DataSet)?.Name)</MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">@(context.Name)</MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">@(context.Unit)</MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Remarks)])">@context.Remarks</MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Product.Label[nameof(Product.Id)])">
+                    @{
+                        var disable = context.ReferenceCount (DataSet) > 0;
+                    }
+                    <MudStack Row>
+                        <MudTooltip Text="@(disable ? "使用中につき削除不可" : "削除")" Duration="1000">
+                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                        </MudTooltip>
+                        <MudSpacer />
+                        @context.Id
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.CategoryId)])">
+                    <MudSelect T="long" Clearable="false" @bind-Value="context.CategoryId">
+                        @foreach (var category in DataSet.Categories) {
+                            <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
+                </MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Unit" />
+                </MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Remarks)])">
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                </MudTd>
+            </RowEditingTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+            </PagerContent>
+            <EditButtonContent Context="button">
+                <MudTooltip Text="編集" Duration="1000">
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+                </MudTooltip>
+            </EditButtonContent>
+        </MudTable>
+        <MudText Class="mt-2" Typo="Typo.body2" Color="Color.Success">@(DataSet.Valid ? "validated" : "")</MudText>
+        <MudToolBar Dense Class="mb-2">
+            @*hidden spacer*@
+        </MudToolBar>
+    } else {
+        <MudText>No items found.</MudText>
+    }
+    <NewItem TItem="Product" DisableAdd="@(_isAdding || !PricesDataSet.EntityIsValid (_newItem))" OnAddItem="AddItem">
+        <MudItem Style="width: 20em;">
+            <MudSelect Class="mr-3" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="_newItem.CategoryId">
+                @foreach (var category in DataSet.Categories) {
+                    <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem Style="width: 20em;">
+            <MudTextField Class="mr-3" Typo="Typo.body2" T="string" Label="adding product name" @bind-Value="_newItem.Name" />
+        </MudItem>
+    </NewItem>
+}
+
+@code {
+    /// <summary>新規生成用アイテムの生成 最初のカテゴリをデフォルトに使用</summary>
+    protected override Product NewEditItem => new Product { CategoryId = DataSet.Categories.Count > 0 ? DataSet.Categories [0].Id : 0 };
+}

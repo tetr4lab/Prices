@@ -8,6 +8,12 @@ namespace Prices.Data;
 
 [TableName ("categories")]
 public class Category : BaseModel<Category>, IBaseModel {
+    /// <summary>食品の税率</summary>
+    public static readonly float TaxRateForFood = 0.08f;
+
+    /// <summary>非食品の税率</summary>
+    public static readonly float TaxRateForNonFood = 0.10f;
+
     /// <inheritdoc/>
     public static string TableLabel => "カテゴリ";
 
@@ -25,7 +31,13 @@ public class Category : BaseModel<Category>, IBaseModel {
 
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("is_food"), Required] public bool IsFood { get; set; } = false;
-    [Column ("tax_rate"), Required] public float TaxRate { get; set; } = 0;
+    [Column ("tax_rate"), Required] public float TaxRate { get; set; } = TaxRateForNonFood;
+
+    /// <summary>税率(%)</summary>
+    public int TaxPercentage {
+        get => (int) (TaxRate * 100);
+        set => TaxRate = value / 100f;
+    }
 
     /// <inheritdoc/>
     public override int ReferenceCount (PricesDataSet set) => set.Products.Count (i => i.CategoryId == Id);

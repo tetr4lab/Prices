@@ -14,9 +14,11 @@
         <MudDivider Vertical FlexItem Class="mx-5" />
     } *@
     <MudSpacer />
-    @ChildContent
+    <MudStack Row Class="align-end">
+        @ChildContent
+    </MudStack>
     <MudTooltip Text="@($"{TItem.TableLabel}を追加")" Duration="1000">
-        <MudFab Class="ml-3" Disabled="DisableAdd" OnClick="OnAddItem" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Small" />
+        <MudFab Disabled="DisableAdd" OnClick="OnAddItem" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Small" />
     </MudTooltip>
 </MudAppBar>
 

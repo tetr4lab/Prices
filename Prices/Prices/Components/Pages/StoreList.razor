@@ -1,5 +1,4 @@
-﻿
-@inherits ItemListBase<Store>
+﻿@inherits ItemListBase<Store>
 
 @page "/stores"
 
@@ -49,10 +48,10 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">
-                    <MudTextField @bind-Value="context.Name" Required />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">
-                    <MudTextField @bind-Value="context.Remarks" />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowEditingTemplate>
             <PagerContent>
@@ -73,7 +72,7 @@
     }
     <NewItem TItem="Store" DisableAdd="@(_isAdding || !PricesDataSet.EntityIsValid (_newItem))" OnAddItem="AddItem">
         <MudItem Style="width: 20em;">
-            <MudTextField T="string" Label="adding store name" @bind-Value="_newItem.Name" />
+            <MudTextField Typo="Typo.body2" T="string" Label="adding store name" @bind-Value="_newItem.Name" />
         </MudItem>
     </NewItem>
 }

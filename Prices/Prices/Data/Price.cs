@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace Prices.Data;
 
 [TableName ("prices")]
-public class Price : BaseModel<Price> {
+public class Price : BaseModel<Price>, IBaseModel {
     /// <inheritdoc/>
     public static string TableLabel => "価格";
 
@@ -19,6 +19,7 @@ public class Price : BaseModel<Price> {
         { nameof (Quantity), "数量" },
         { nameof (UnitPrice), "単価" },
         { nameof (TaxRate), "税率" },
+        { nameof (Category), "カテゴリ" },
         { nameof (ProductId), "製品" },
         { nameof (StoreId), "店舗" },
         { nameof (Confirmed), "確認日時" },
@@ -40,10 +41,16 @@ public class Price : BaseModel<Price> {
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
 
     /// <summary>カテゴリ</summary>
-    public Category? Category (PricesDataSet set) => set.Categories.Find (i => i.Id == Product (set)?.Id);
+    public Category? Category (PricesDataSet set) => set.Categories.Find (i => i.Id == Product (set)?.CategoryId);
 
     /// <summary>店舗</summary>
     public Store? Store (PricesDataSet set) => set.Stores.Find (i => i.Id == StoreId);
+
+    /// <summary>税率(%)</summary>
+    public int TaxPercentage {
+        get => (int) (TaxRate * 100);
+        set => TaxRate = value / 100f;
+    }
 
     /// 同じ製品の価格数
     public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == ProductId);
