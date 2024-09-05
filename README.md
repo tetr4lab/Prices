@@ -43,7 +43,8 @@ CREATE TABLE `categories` (
   `is_food` bit(1) NOT NULL DEFAULT b'0',
   `tax_rate` float NOT NULL,
   `remarks` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='カテゴリ';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_categories` BEFORE UPDATE ON `categories` FOR EACH ROW begin
@@ -92,6 +93,7 @@ CREATE TABLE `products` (
   `unit` varchar(50) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
   KEY `category_id` (`category_id`),
   CONSTRAINT `fk_category_id_categories_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='製品';
@@ -111,7 +113,8 @@ CREATE TABLE `stores` (
   `modefied` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `name` varchar(255) NOT NULL,
   `remarks` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='店舗';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_stores` BEFORE UPDATE ON `stores` FOR EACH ROW begin
@@ -134,10 +137,9 @@ DELIMITER ;
     - 編集: 行ボタン
     - カテゴリ: 列
       - このカテゴリのみに絞り込み: ボタン
-      - 同じカテゴリを追加: ボタン
     - 製品: 列
       - この製品のみに絞り込み: ボタン
-      - 同じ製品を追加: ボタン
+      - 同じ製品を追加して編集: ボタン
     - 店舗: 列
     - 価格: 列
     - 数量: 列
@@ -146,25 +148,26 @@ DELIMITER ;
     - 確認日時: 列
     - 備考: 列
     - 編集: 行ボタン
-      - 価格: 編集ダイアログ
-        - キャンセル: ボタン
-        - 保存: ボタン
-        - 削除: ボタン
-        - 価格: フィールド
-        - 数量: フィールド
-        - 製品: ボタン
-          - 製品選択: ダイアログ
-            - カテゴリ: セレクタ
-            - 製品: セレクタ
-        - ストア: セレクタ
-        - 税: トグル
-          - [税込み/税抜き]の状態に応じて、税率フィールドの扱いが切り替わる
-        - 税率: フィールド
-        - 確認日時: ピッカー
-          - 価格が無効な値から有効な値に更新された日時が自動的に記録されるが、書き換え可能
-        - 備考: フィールド
+      - 価格編集へ
+- 価格: 編集ダイアログ
+  - 製品: テキスト
+  - キャンセル: ボタン
+  - 保存: ボタン
+  - 削除: ボタン
+    - 確認: ダイアログ
+      - 特に、製品価格の最後のひとつを削除しようとしたとき
+  - 価格: フィールド
+  - 数量: フィールド
+  - ストア: セレクタ
+  - 税: トグル
+    - [税込み/税抜き]の状態に応じて、税率フィールドの扱いが切り替わる
+  - 税率: フィールド
+  - 確認日時: ピッカー
+    - 価格が無効な値から有効な値に更新された日時が自動的に記録されるが、書き換え可能
+  - 備考: フィールド
 - カテゴリ: 一覧・インライン編集画面
   - 新規追加: ボタン
+    - 名前: フィールド
   - 一覧: 表
     - 名前: 列フィールド
     - 食品: 列トグル
@@ -178,15 +181,19 @@ DELIMITER ;
   - 絞込解除: ボタン
     - カテゴリの絞り込みを解除
   - 新規追加: ボタン
+    - 名前: フィールド
   - 一覧: 表
     - 名前:列フィールド
     - カテゴリ: 列セレクタ
     - 備考: 列フィールド
     - 削除: 行ボタン
-    - 一覧: 行ボタン
+    - 価格追加: 行ボタン
+      - 選択した製品の価格を追加
+    - 価格一覧: 行ボタン
       - 選択した製品の価格を一覧
 - 店舗: 一覧・インライン編集画面
   - 新規追加: ボタン
+    - 名前: フィールド
   - 一覧: 表
     - 名前:列フィールド
     - 備考: 列フィールド

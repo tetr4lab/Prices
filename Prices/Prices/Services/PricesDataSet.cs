@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using MySqlConnector;
 using PetaPoco;
 using Prices.Data;
@@ -69,9 +71,9 @@ public sealed class PricesDataSet {
         }
         isLoading = true;
         for (var i = 0; i < MaxRetryCount; i++) {
-            var result = await GetPairAsync<Book, Author> ();
-            if (result.books.IsSuccess && result.authors.IsSuccess) {
-                (Books, Authors) = (result.books.Value, result.authors.Value);
+            var result = await GetSetAsync ();
+            if (result.IsSuccess) {
+                (Categories, Products, Stores, Prices) = result.Value;
                 isLoading = false;
                 return;
             }
@@ -83,9 +85,27 @@ public sealed class PricesDataSet {
 
     /// <summary>指定クラスのモデルインスタンスを取得</summary>
     public List<T> GetAll<T>() where T : class => (
-            typeof(T) == typeof(Author) ? Authors as List<T> :
-            typeof(T) == typeof(Book) ? Books as List<T> : null
+            typeof (T) == typeof (Category) ? Categories as List<T> :
+            typeof (T) == typeof (Product) ? Products as List<T> :
+            typeof (T) == typeof (Store) ? Stores as List<T> :
+            typeof (T) == typeof (Price) ? Prices as List<T> :
+
+            typeof (T) == typeof(Author) ? Authors as List<T> :
+            typeof(T) == typeof(Book) ? Books as List<T> :
+            null
         ) ?? new();
+
+    /// <summary>ロード済みのモデルインスタンス</summary>
+    public List<Category> Categories { get; private set; } = new ();
+
+    /// <summary>ロード済みのモデルインスタンス</summary>
+    public List<Product> Products { get; private set; } = new ();
+
+    /// <summary>ロード済みのモデルインスタンス</summary>
+    public List<Store> Stores { get; private set; } = new ();
+
+    /// <summary>ロード済みのモデルインスタンス</summary>
+    public List<Price> Prices { get; private set; } = new ();
 
     /// <summary>ロード済みのモデルインスタンス</summary>
     public List<Author> Authors {
@@ -104,8 +124,104 @@ public sealed class PricesDataSet {
     /// <summary>有効性の検証</summary>
     public bool Valid
         => IsReady
+        && Categories != null && !Categories.Exists (i => i.Id <= 0)
+        && Products != null && !Products.Exists (i => i.Id <= 0)
+        && Stores != null && !Stores.Exists (i => i.Id <= 0)
+        && Prices != null && !Prices.Exists (i => i.Id <= 0)
+
         && _authors != null && !_authors.Exists (i => i.DataSet != this || i.Id <= 0)
-        && _books != null && !_books.Exists (i => i.DataSet != this || i.Id <= 0);
+        && _books != null && !_books.Exists (i => i.DataSet != this || i.Id <= 0)
+        ;
+
+    /// <summary>一覧セットをアトミックに取得</summary>
+    private async Task<Result<(List<Category>, List<Product>, List<Store>, List<Price>)>> GetSetAsync () {
+        var categoriesTable = GetSqlName<Category> ();
+        var productsTable = GetSqlName<Product> ();
+        var storesTable = GetSqlName<Store> ();
+        var pricesTable = GetSqlName<Price> ();
+        return await ProcessAndCommitAsync<(List<Category>, List<Product>, List<Store>, List<Price>)> (async () => {
+            var categories = await database.FetchAsync<Category> ($"select {categoriesTable}.* from {categoriesTable};");
+            var products = await database.FetchAsync<Product> ($"select {productsTable}.* from {productsTable};");
+            var stores = await database.FetchAsync<Store> ($"select {storesTable}.* from {storesTable};");
+            var prices = await database.FetchAsync<Price> ($"select {pricesTable}.* from {pricesTable};");
+            return (categories, products, stores, prices);
+        });
+    }
+
+    /// <summary>単一アイテムを取得 (Idで特定) 【注意】総リストとは別オブジェクトになる</summary>
+    public async Task<Result<T?>> GetItemByIdAsync<T> (T item) where T : BaseModel<T>, new() {
+        var table = GetSqlName<T> ();
+        return await ProcessAndCommitAsync (async () => (await database.FetchAsync<T?> (
+            $"select {table}.* from {table} where {table}.Id = @Id;",
+            item
+        )).Single ());
+    }
+
+    /// <summary>アイテムの更新サブ処理 トランザクション内専用</summary>
+    private async Task<int> UpdateItemAsync<T> (T item) where T : BaseModel<T>, new() {
+        var table = GetSqlName<T> ();
+        return await database.ExecuteAsync (
+            @$"update {table} set {GetSettingSql<T> ()} where {table}.Id = @Id",
+            item
+        );
+    }
+
+    /// <summary>アイテムの更新</summary>
+    public async Task<Result<int>> UpdateAsync<T> (T item) where T : BaseModel<T>, new() {
+        var result = await ProcessAndCommitAsync (async () => {
+            item.Version++;
+            return await UpdateItemAsync<T> (item);
+        });
+        if (result.IsSuccess && result.Value <= 0) {
+            result.Status = Status.MissingEntry;
+        }
+        return result;
+    }
+
+    /// <summary>単一アイテムの追加</summary>
+    public async Task<Result<T>> AddAsync<T> (T item) where T : BaseModel<T>, new() {
+        var result = await ProcessAndCommitAsync (async () => {
+            item.Id = await database.ExecuteScalarAsync<int> (
+                @$"insert into {GetSqlName<T> ()} ({GetColumnsSql<T> ()}) values ({GetValuesSql<T> ()});
+                select LAST_INSERT_ID();",
+                item
+            );
+            return item.Id > 0 ? 1 : 0;
+        });
+        if (result.IsSuccess && result.Value <= 0) {
+            result.Status = Status.MissingEntry;
+        }
+        if (result.IsFailure) {
+            item.Id = default;
+        }
+        // ロード済みに追加
+        GetAll<T> ().Add (item);
+        return new (result.Status, item);
+    }
+
+    /// <summary>単一アイテムの削除</summary>
+    public async Task<Result<int>> RemoveAsync<T> (T item) where T : BaseModel<T>, new() {
+        var result = await ProcessAndCommitAsync (async () => {
+            var original = await GetItemByIdAsync<T> (item);
+            if (original.IsSuccess && original.Value != null) {
+                if (item.Version == original.Value.Version) {
+                    return await database.ExecuteAsync (
+                        $"delete from {GetSqlName<T> ()} where Id = @Id",
+                        item
+                    );
+                } else {
+                    throw new MyDataSetException ($"Version mismatch between {item.Version} and {original.Value.Version}");
+                }
+            }
+            return 0;
+        });
+        if (result.IsSuccess && result.Value <= 0) {
+            result.Status = Status.MissingEntry;
+        }
+        // ロード済みから除去
+        GetAll<T> ().Remove (item);
+        return result;
+    }
 
     /// <summary>読み込み済み総リストから対象Idの存在を確認</summary>
     public bool ExistsById<T1, T2> (long id)
@@ -175,7 +291,7 @@ public sealed class PricesDataSet {
 
     /// <summary>追加用値SQL</summary>
     /// <remarks>ColumnでありかつVirtualColumnでないプロパティだけを対象とする</remarks>
-    public string GetValuesSql<T> (int index = -1, bool withId = false) where T : class {
+    public static string GetValuesSql<T> (int index = -1, bool withId = false) where T : class {
         var result = string.Empty;
         var properties = typeof (T).GetProperties (BindingFlags.Instance | BindingFlags.Public);
         if (properties != null) {
@@ -192,7 +308,7 @@ public sealed class PricesDataSet {
 
     /// <summary>追加用カラムSQL</summary>
     /// <remarks>ColumnでありかつVirtualColumnでないプロパティだけを対象とする</remarks>
-    public string GetColumnsSql<T> (bool withId = false) where T : class {
+    public static string GetColumnsSql<T> (bool withId = false) where T : class {
         var result = string.Empty;
         var properties = typeof (T).GetProperties (BindingFlags.Instance | BindingFlags.Public);
         if (properties != null) {
@@ -207,20 +323,47 @@ public sealed class PricesDataSet {
         return result;
     }
 
+    /// <summary>必須項目のチェック</summary>
+    public static bool EntityIsValid<T> (T? item, bool withId = false) where T : BaseModel<T>, new () {
+        if (item == null || withId && (item.Id <= 0 || item.Modefied == default)) { return false; }
+        var properties = new List<PropertyInfo> ();
+        foreach (var property in typeof (T).GetProperties (BindingFlags.Instance | BindingFlags.Public) ?? []) {
+            var required = property.GetCustomAttribute<RequiredAttribute> ();
+            var attribute = property.GetCustomAttribute<ColumnAttribute> ();
+            if (attribute != null && required != null) {
+                properties.Add (property);
+            }
+        }
+        foreach (var property in properties) {
+            var value = property.GetValue (item);
+            var type = value?.GetType ();
+            if (type == typeof (string)) {
+                if (string.IsNullOrEmpty (property.GetValue (item) as string)) {
+                    return false;
+                }
+            } else if (type?.IsClass == true) {
+                if (property.GetValue (item) == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /// <summary>アイテムリストから辞書型パラメータを生成する</summary>
     private Dictionary<string, object?> GetParamDictionary<T> (IEnumerable<T> values, bool withId = false) {
         var parameters = new Dictionary<string, object?> ();
-        var prpperties = new List<PropertyInfo> ();
+        var properties = new List<PropertyInfo> ();
         foreach (var property in typeof (T).GetProperties (BindingFlags.Instance | BindingFlags.Public) ?? []) {
             var attribute = property.GetCustomAttribute<ColumnAttribute> ();
             if (attribute != null && property.GetCustomAttribute<VirtualColumnAttribute> () == null
                 && (withId || (attribute.Name ?? property.Name) != "Id")) {
-                prpperties.Add (property);
+                properties.Add (property);
             }
         }
         var i = 0;
         foreach (var value in values) {
-            foreach (var property in prpperties) {
+            foreach (var property in properties) {
                 parameters.Add ($"{property.Name}_{i}", property.GetValue (value));
             }
             i++;

@@ -9,7 +9,7 @@ using Prices.Components;
 using Prices.Services;
 
 var builder = WebApplication.CreateBuilder (args);
-var connectionString = $"database=exlibris;{builder.Configuration.GetConnectionString ("Host")}{builder.Configuration.GetConnectionString ("Account")}Allow User Variables=true;";
+var connectionString = $"database=prices;{builder.Configuration.GetConnectionString ("Host")}{builder.Configuration.GetConnectionString ("Account")}Allow User Variables=true;";
 
 // Add services to the container.
 builder.Services.AddRazorComponents ()

@@ -52,6 +52,25 @@
     </MudPaper>
     <MudText Class="mt-2" Typo="Typo.body2" Color="Color.Success">@(DataSet.Valid ? "validated" : "")</MudText>
     <MudText Class="mt-2" Typo="Typo.body2">load time: @ElapsedTime ±@(PricesDataSet.WaitInterval)msec</MudText>
+
+    <MudSimpleTable>
+        @foreach (var price in DataSet.Prices) {
+            var product = DataSet.Products.Find (i => i.Id == price.ProductId) ?? new ();
+            var category = DataSet.Categories.Find(i => i.Id == product.CategoryId) ?? new ();
+            var store = DataSet.Stores.Find (i => i.Id == price.StoreId) ?? new ();
+            <tr>
+                <td>@price.Id</td>
+                <td>@category.Name</td>
+                <td>@(product.Name)(@(price.ReferenceCount (DataSet)))</td>
+                <td>@store.Name</td>
+                <td>@price.PriceWithTax</td>
+                <td>@(price.Quantity)@(product.Unit)</td>
+                <td>@price.UnitPrice</td>
+                <td>@price.Confirmed</td>
+                <td>@price.Remarks</td>
+            </tr>
+        }
+    </MudSimpleTable>
 }
 
 @code {
@@ -229,7 +248,7 @@
     /// <summary>初期化</summary>
     protected override async Task OnInitializedAsync () {
         await base.OnInitializedAsync ();
-        await SetSectionTitle.InvokeAsync ("Home");
+        await SetSectionTitle.InvokeAsync ("Prices");
         // セッション数の変化を購読
         SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
     }

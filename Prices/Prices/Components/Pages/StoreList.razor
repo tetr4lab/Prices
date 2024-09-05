@@ -1,0 +1,79 @@
+﻿
+@inherits ItemListBase<Store>
+
+@page "/stores"
+
+<PageTitle>Prices Stores</PageTitle>
+
+@if (DataSet.IsUnavailable) {
+    <MudAlert Severity="Severity.Error" Elevation="3">Unable to connect to any of the specified database management hosts.</MudAlert>
+} else if (!DataSet.IsReady || items == null) {
+    <MudProgressCircular Indeterminate="true" />
+} else {
+    if (items.Count > 0) {
+        <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
+            SortLabel="⇅"
+            AllowUnsorted="true"
+            @bind-SelectedItem="selectedItem"
+            CommitEditTooltip="保存"
+            CancelEditTooltip="取消"
+            RowEditPreview="Edit"
+            RowEditCancel="Cancel"
+            RowEditCommit="Commit"
+            ReadOnly="false"
+            CanCancelEdit="true"
+            IsEditRowSwitchingBlocked="true"
+            ApplyButtonPosition="TableApplyButtonPosition.End"
+            EditButtonPosition="TableEditButtonPosition.End"
+            EditTrigger="TableEditTrigger.EditButton"
+        >
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<Store, object>(x=>x.Id)">@(Store.Label[nameof (Store.Id)])</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Store, string?>(x=>x.Name)">@(Store.Label [nameof (Store.Name)])</MudTableSortLabel></MudTh>
+                <MudTh>@(Store.Label[nameof (Store.Remarks)])</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">@context.Id</MudTd>
+                <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">@(context.Name)</MudTd>
+                <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">@context.Remarks</MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">
+                    @{var disable = context.ReferenceCount (DataSet) > 0;}
+                    <MudStack Row>
+                        <MudTooltip Text="@(disable ? "使用中につき削除不可" : "削除")" Duration="1000">
+                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                        </MudTooltip>
+                        <MudSpacer />
+                        @context.Id
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">
+                    <MudTextField @bind-Value="context.Name" Required />
+                </MudTd>
+                <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">
+                    <MudTextField @bind-Value="context.Remarks" />
+                </MudTd>
+            </RowEditingTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+            </PagerContent>
+            <EditButtonContent Context="button">
+                <MudTooltip Text="編集" Duration="1000">
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+                </MudTooltip>
+            </EditButtonContent>
+        </MudTable>
+        <MudText Class="mt-2" Typo="Typo.body2" Color="Color.Success">@(DataSet.Valid ? "validated" : "")</MudText>
+        <MudToolBar Dense Class="mb-2">
+            @*hidden spacer*@
+        </MudToolBar>
+    } else {
+        <MudText>No items found.</MudText>
+    }
+    <NewItem TItem="Store" DisableAdd="@(_isAdding || !PricesDataSet.EntityIsValid (_newItem))" OnAddItem="AddItem">
+        <MudItem Style="width: 20em;">
+            <MudTextField T="string" Label="adding store name" @bind-Value="_newItem.Name" />
+        </MudItem>
+    </NewItem>
+}

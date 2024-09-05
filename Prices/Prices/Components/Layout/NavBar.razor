@@ -9,22 +9,29 @@
     <MudItem>
         <MudNavLink Href="./" Match="NavLinkMatch.All">
             <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-                <MudIcon Icon="@Icons.Material.Filled.Home" />Home
+                <MudIcon Icon="@Icons.Material.Filled.PriceChange" />Prices
             </MudText>
         </MudNavLink>
     </MudItem>
 }
 <MudItem>
-    <MudNavLink Href="books">
+    <MudNavLink Href="products">
         <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" />Books
+            <MudIcon Icon="@Icons.Material.Filled.ShoppingBasket" />Products
         </MudText>
     </MudNavLink>
 </MudItem>
 <MudItem>
-    <MudNavLink Href="authors">
+    <MudNavLink Href="categories">
         <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.People" />Authors
+            <MudIcon Icon="@Icons.Material.Filled.Category" />Categories
+        </MudText>
+    </MudNavLink>
+</MudItem>
+<MudItem>
+    <MudNavLink Href="stores">
+        <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Store" />Stores
         </MudText>
     </MudNavLink>
 </MudItem>
@@ -52,13 +59,6 @@
                     <MudText Typo="Typo.body2" Align="Align.Left">'='が先行する部分は一致すると適合します。</MudText>
                     <MudText Typo="Typo.body2" Align="Align.Left">'|'で区切られた部分はいずれか一つで適合します。</MudText>
                 </TooltipContent>
-            </MudTooltip>
-            <MudTooltip Text="今月" Duration="1000">
-                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.CalendarMonth" OnClick="@(() => {
-                    var month = $"{DateTime.Now.Year:D4}/{DateTime.Now.Month:D2}/";
-                    _filterText = _filterText == month ? "" : month;
-                    OnClick ();
-                })" />
             </MudTooltip>
             @if (!OnClickChangeModeButton.Equals (EventCallback.Empty)) {
                 <MudIconButton Size="Size.Small" Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="(async () => await OnClickChangeModeButton.InvokeAsync ())" />

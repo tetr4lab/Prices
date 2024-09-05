@@ -8,6 +8,146 @@ using static Prices.Services.PricesDataSet;
 
 namespace Prices.Components.Pages;
 
+public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>, IBaseModel, new() {
+
+    /// <summary>列挙する最大数</summary>
+    protected const int MaxListingNumber = 500;
+
+    [Inject] protected NavigationManager NavManager { get; set; } = null!;
+    [Inject] protected PricesDataSet DataSet { get; set; } = null!;
+    [Inject] protected IDialogService DialogService { get; set; } = null!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+
+    /// <summary>検索文字列</summary>
+    [CascadingParameter (Name = "Filter")] protected string? FilterText { get; set; }
+
+    /// <summary>セクションラベル設定</summary>
+    [CascadingParameter (Name = "Section")] protected EventCallback<string> SetSectionTitle { get; set; }
+
+    /// <summary>セッション数の更新</summary>
+    [CascadingParameter (Name = "Session")] protected EventCallback<int> UpdateSessionCount { get; set; }
+
+    /// <summary>項目一覧</summary>
+    protected List<T>? items => DataSet.IsReady ? DataSet.GetAll<T> () : null;
+
+    /// <summary>選択項目</summary>
+    protected T selectedItem { get; set; } = new ();
+
+    /// <summary>初期化</summary>
+    protected override async Task OnInitializedAsync () {
+        await base.OnInitializedAsync ();
+        await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
+        // セッション数の変化を購読
+        SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
+    }
+
+    /// <summary>破棄</summary>
+    public void Dispose () {
+        SessionCounter.Unsubscribe (this);
+    }
+
+    /// <summary>描画後処理</summary>
+    protected override async void OnAfterRender (bool firstRender) {
+        base.OnAfterRender (firstRender);
+        if (firstRender) {
+            await DataSet.InitializeAsync ();
+            StateHasChanged ();
+        }
+    }
+
+    /// <summary>表示の更新</summary>
+    protected void Update () { }// `=> StateHasChanged();`の処理は、コールバックを受けた時点で内部的に呼ばれているため、明示的な呼び出しは不要
+
+    /// <summary>表示の更新と反映待ち</summary>
+    protected async Task StateHasChangedAsync () {
+        StateHasChanged ();
+        await TaskEx.DelayOneFrame;
+    }
+
+    /// <summary>デフォルト項目数の設定</summary>
+    protected override Task OnAfterRenderAsync (bool firstRender) {
+        if (_table != null && !_inited) {
+            _inited = true;
+            _table.SetRowsPerPage (_pageSizeOptions [1]);
+        }
+        return base.OnAfterRenderAsync (firstRender);
+    }
+    protected bool _inited;
+    protected MudTable<T>? _table;
+    /// <summary>項目数の選択肢</summary>
+    protected int [] _pageSizeOptions = { 10, 20, 25, 50, 100, 200, MaxListingNumber, };
+
+    /// <summary>バックアップ</summary>
+    protected virtual T backupedItem { get; set; }  = new ();
+
+    /// <summary>型チェック</summary>
+    private T GetT (object obj) => obj as T ?? throw new ArgumentException ($"The type of the argument '{obj.GetType ()}' does not match the expected type '{typeof (T)}'.");
+
+    /// <summary>編集開始</summary>
+    protected virtual void Edit (object obj) {
+        var item = GetT (obj);
+        backupedItem = item.Clone ();
+    }
+
+    /// <summary>編集完了</summary>
+    protected virtual async void Commit (object obj) {
+        var item = GetT (obj);
+        if (EntityIsValid (item) && !backupedItem.Equals (item)) {
+            await DataSet.UpdateAsync (item);
+            Snackbar.Add ($"{T.TableLabel}を更新しました。", Severity.Normal);
+            StateHasChanged ();
+        }
+    }
+
+    /// <summary>編集取消</summary>
+    protected virtual void Cancel (object obj) {
+        var item = GetT (obj);
+        if (!backupedItem.Equals (item)) {
+            backupedItem.CopyTo (item);
+            StateHasChanged ();
+        }
+    }
+    //protected bool _canCancelEdit;
+
+    /// <summary>項目追加</summary>
+    protected virtual async void AddItem () {
+        if (_isAdding || items == null) { return; }
+        _isAdding = true;
+        await StateHasChangedAsync ();
+        if (EntityIsValid (_newItem)) {
+            var result = await DataSet.AddAsync (_newItem);
+            if (result.IsSuccess && _table != null) {
+                System.Diagnostics.Debug.WriteLine ($"Added {_newItem}");
+                await StateHasChangedAsync ();
+                _table.SetEditingItem (_newItem);
+                Snackbar.Add ($"{T.TableLabel}を追加しました。", Severity.Normal);
+                _newItem = new ();
+            }
+        }
+        _isAdding = false;
+        StateHasChanged ();
+    }
+    protected bool _isAdding;
+    protected T _newItem = new ();
+
+    /// <summary>項目削除</summary>
+    /// <param name="obj"></param>
+    protected virtual async void DeleteItem (object obj) {
+        var item = GetT (obj);
+        if (_table == null) { return; }
+        // 確認ダイアログ
+        var dialogResult = await DialogService.Confirmation ([$"以下の{T.TableLabel}を完全に削除します。", item.ToString ()], title: $"{T.TableLabel}削除", position: DialogPosition.BottomCenter, acceptionLabel: "Delete", acceptionColor: Color.Error);
+        if (dialogResult != null && !dialogResult.Canceled && dialogResult.Data is bool ok && ok) {
+            _table.SetEditingItem (null);
+            await DataSet.RemoveAsync (item);
+            StateHasChanged ();
+            Snackbar.Add ($"{T.TableLabel}を削除しました。", Severity.Normal);
+        }
+    }
+
+}
+
+
 public class ItemListBase<TItem1, TItem2> : ComponentBase, IDisposable
     where TItem1 : PricesBaseModel<TItem1, TItem2>, IPricesModel, new()
     where TItem2 : PricesBaseModel<TItem2, TItem1>, IPricesModel, new() {
