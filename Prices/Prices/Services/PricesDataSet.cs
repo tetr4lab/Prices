@@ -135,15 +135,11 @@ public sealed class PricesDataSet {
 
     /// <summary>一覧セットをアトミックに取得</summary>
     private async Task<Result<(List<Category>, List<Product>, List<Store>, List<Price>)>> GetSetAsync () {
-        var categoriesTable = GetSqlName<Category> ();
-        var productsTable = GetSqlName<Product> ();
-        var storesTable = GetSqlName<Store> ();
-        var pricesTable = GetSqlName<Price> ();
         return await ProcessAndCommitAsync<(List<Category>, List<Product>, List<Store>, List<Price>)> (async () => {
-            var categories = await database.FetchAsync<Category> ($"select {categoriesTable}.* from {categoriesTable};");
-            var products = await database.FetchAsync<Product> ($"select {productsTable}.* from {productsTable};");
-            var stores = await database.FetchAsync<Store> ($"select {storesTable}.* from {storesTable};");
-            var prices = await database.FetchAsync<Price> ($"select {pricesTable}.* from {pricesTable};");
+            var categories = await database.FetchAsync<Category> (Category.BaseSelectSql);
+            var products = await database.FetchAsync<Product> (Product.BaseSelectSql);
+            var stores = await database.FetchAsync<Store> (Store.BaseSelectSql);
+            var prices = await database.FetchAsync<Price> (Price.BaseSelectSql);
             return (categories, products, stores, prices);
         });
     }
@@ -193,9 +189,10 @@ public sealed class PricesDataSet {
         }
         if (result.IsFailure) {
             item.Id = default;
+        } else {
+            // ロード済みに追加
+            GetAll<T> ().Add (item);
         }
-        // ロード済みに追加
-        GetAll<T> ().Add (item);
         return new (result.Status, item);
     }
 
@@ -545,9 +542,10 @@ public sealed class PricesDataSet {
         }
         if (result.IsFailure) {
             item.Id = default;
+        } else {
+            // ロード済みに追加
+            GetAll<T1> ().Add (item);
         }
-        // ロード済みに追加
-        GetAll<T1> ().Add (item);
         return new (result.Status, item);
     }
 

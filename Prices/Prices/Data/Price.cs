@@ -27,11 +27,22 @@ public class Price : BaseModel<Price>, IBaseModel {
     };
 
     /// <inheritdoc/>
+    public static string BaseSelectSql {
+        get {
+            var table = PricesDataSet.GetSqlName<Price> ();
+            return $@"select {table}.* from {table}
+                left join products on products.id = product_id
+                order by products.category_id, product_id, price
+                ;";
+        }
+    }
+
+    /// <inheritdoc/>
     public static string UniqueKeysSql => "";
 
-    [Column ("price")] public float PriceWithTax { get; set; }
-    [Column ("quantity")] public float Quantity { get; set; }
-    [Column ("unit_price"), VirtualColumn] public float UnitPrice { get; set; }
+    [Column ("price")] public float? PriceWithTax { get; set; } = null;
+    [Column ("quantity")] public float? Quantity { get; set; } = null;
+    [Column ("unit_price"), VirtualColumn] public float? UnitPrice { get; set; } = null;
     [Column ("tax_rate"), Required] public float TaxRate { get; set; } = 0;
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
@@ -52,8 +63,8 @@ public class Price : BaseModel<Price>, IBaseModel {
         set => TaxRate = value / 100f;
     }
 
-    /// 同じ製品の価格数
-    public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == ProductId);
+    /// 同じ製品の価格数が1(最後のひとつ)なら1、それ以外(まだ他にある)なら0
+    public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == ProductId) == 1 ? 1 : 0;
 
     /// <inheritdoc/>
     public override Price Clone () {

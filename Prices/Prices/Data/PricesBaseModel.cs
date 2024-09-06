@@ -12,6 +12,8 @@ public interface IBaseModel {
     public static abstract string TableLabel { get; }
     /// <summary>列の名前</summary>
     public static abstract Dictionary<string, string> Label { get; }
+    /// <summary>データ取得SQL表現</summary>
+    public static abstract string BaseSelectSql { get; }
 }
 
 /// <summary>基底モデル</summary>

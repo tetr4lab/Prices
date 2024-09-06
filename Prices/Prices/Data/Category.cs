@@ -27,6 +27,14 @@ public class Category : BaseModel<Category>, IBaseModel {
     };
 
     /// <inheritdoc/>
+    public static string BaseSelectSql {
+        get {
+            var table = PricesDataSet.GetSqlName<Category> ();
+            return $"select {table}.* from {table} order by id;";
+        }
+    }
+
+    /// <inheritdoc/>
     public static string UniqueKeysSql => "";
 
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";

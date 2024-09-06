@@ -23,8 +23,8 @@
 </MudAppBar>
 
 @code {
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
     // /// <summary>削除ボタンを表示する条件</summary>
     // [Parameter] public bool AllowDeleteItems { get; set; }
     // /// <summary>切り替えボタンが押せない条件</summary>

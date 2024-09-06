@@ -30,26 +30,61 @@
                 <MudTh>@(Price.Label [nameof (Price.Category)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.ProductId)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
-                <MudTh>@(Price.Label [nameof (Price.PriceWithTax)])</MudTh>
-                
+                <MudTh Class="align-right">@(Price.Label [nameof (Price.PriceWithTax)])</MudTh>
+                <MudTh Class="align-right">@(Price.Label [nameof (Price.Quantity)])</MudTh>
+
                 <MudTh>@(Price.Label [nameof (Price.Remarks)])</MudTh>
+                @{ lastCategoryId = lastProductId = lastStoreId = 0; }
             </HeaderContent>
             <RowTemplate>
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">@context.Id</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(context.Category (DataSet)?.Name)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(context.Product (DataSet)?.Name)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(context.Store (DataSet)?.Name)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">@context.PriceWithTax</MudTd>
-                
+                @{
+                    var category = context.Category (DataSet);
+                    var product = context.Product (DataSet);
+                    var store = context.Store (DataSet);
+                    var newCategory = category?.Id != lastCategoryId;
+                    var newProduct = product?.Id != lastProductId;
+                    var newStore = store?.Id != lastStoreId;
+                    lastCategoryId = category?.Id ?? 0;
+                    lastProductId = product?.Id ?? 0;
+                    lastStoreId = store?.Id ?? 0;
+                }
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">@(context.Id)</MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
+                    <MudStack Row>
+                        @if (newProduct) {
+                            <MudTooltip Text="この製品の価格を追加" Duration="1000">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.AddCircleOutline" Class="pa-0" OnClick="() => AddSameItem (context.ProductId, context.StoreId)" />
+                            </MudTooltip>
+                        }
+                        <MudSpacer />
+                        @(context.PriceWithTax == null ? "未記入" : $"¥{context.PriceWithTax:#,0}")
+                    </MudStack>
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">@(context.Quantity == null ? "未記入" : $"{context.Quantity}{product?.Unit}")</MudTd>
+
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>
             <RowEditingTemplate>
+                @{
+                    var category = context.Category (DataSet);
+                    var product = context.Product (DataSet);
+                    var store = context.Store (DataSet);
+                    var newCategory = category?.Id != lastCategoryId;
+                    var newProduct = product?.Id != lastProductId;
+                    var newStore = store?.Id != lastStoreId;
+                    lastCategoryId = category?.Id ?? 0;
+                    lastProductId = product?.Id ?? 0;
+                    lastStoreId = store?.Id ?? 0;
+                }
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">
                     @{
                         var disable = context.ReferenceCount (DataSet) > 0;
                     }
                     <MudStack Row>
-                        <MudTooltip Text="@(disable ? "使用中につき削除不可" : "削除")" Duration="1000">
+                        <MudTooltip Text="@(disable ? "最後につき削除不可" : "削除")" Duration="1000">
                             <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
                         </MudTooltip>
                         <MudSpacer />
@@ -71,12 +106,16 @@
                         }
                     </MudSelect>
                 </MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
-                    <MudTextField Typo="Typo.body2" T="float" @bind-Value="context.PriceWithTax" Required />
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
+                    <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
+                    @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
+                    <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.End" AdornmentText="@(product?.Unit)" @bind-Value="context.Quantity" />
                 </MudTd>
 
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Price.Label[nameof(Price.Remarks)])" />
                 </MudTd>
             </RowEditingTemplate>
             <PagerContent>
@@ -100,4 +139,21 @@
             <MudTextField Typo="Typo.body2" T="string" Label="adding Price name" @bind-Value="_newItem.Name" />
         </MudItem>
     </NewItem> *@
+}
+
+
+@code{
+    /// <summary>直上の行との比較用</summary>
+    protected long lastCategoryId;
+    /// <summary>直上の行との比較用</summary>
+    protected long lastProductId;
+    /// <summary>直上の行との比較用</summary>
+    protected long lastStoreId;
+
+    /// 同じ製品の価格を追加
+    protected async Task AddSameItem (long productId, long storeId) {
+        _newItem.ProductId = productId;
+        _newItem.StoreId = storeId;
+        await base.AddItem ();
+    }
 }

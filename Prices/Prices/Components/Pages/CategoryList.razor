@@ -51,16 +51,16 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Category.Label[nameof(Category.Name)])" />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.IsFood)])">
                     <MudCheckBox T="bool" @bind-Value:get="context.IsFood" @bind-Value:set="@(sw => OnChangeIsFoodAsync (sw, context))" />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.TaxRate)])">
-                    <MudNumericField Typo="Typo.body2" T="int" @bind-value="context.TaxPercentage" />
+                    <MudNumericField Typo="Typo.body2" T="int" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Category.Label[nameof(Category.Remarks)])" />
                 </MudTd>
             </RowEditingTemplate>
             <PagerContent>

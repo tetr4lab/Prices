@@ -95,9 +95,12 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected virtual async void Commit (object obj) {
         var item = GetT (obj);
         if (EntityIsValid (item) && !backupedItem.Equals (item)) {
-            await DataSet.UpdateAsync (item);
-            Snackbar.Add ($"{T.TableLabel}を更新しました。", Severity.Normal);
-            StateHasChanged ();
+            var result = await DataSet.UpdateAsync (item);
+            if (result.IsSuccess) {
+                Snackbar.Add ($"{T.TableLabel}を更新しました。", Severity.Normal);
+            } else {
+                Snackbar.Add ($"{T.TableLabel}を更新できませんでした。", Severity.Error);
+            }
         }
     }
 
@@ -106,8 +109,8 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         var item = GetT (obj);
         if (!backupedItem.Equals (item)) {
             backupedItem.CopyTo (item);
-            StateHasChanged ();
         }
+        StateHasChanged ();
     }
     //protected bool _canCancelEdit;
 
@@ -119,18 +122,28 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         if (EntityIsValid (_newItem)) {
             var result = await DataSet.AddAsync (_newItem);
             if (result.IsSuccess && _table != null) {
+                _lastCreatedId = result.Value.Id;
+                await DataSet.LoadAsync ();
                 await StateHasChangedAsync ();
-                _table.SetEditingItem (_newItem);
-                Edit (_newItem);
-                Snackbar.Add ($"{T.TableLabel}を追加しました。", Severity.Normal);
                 _newItem = NewEditItem;
+                if (items != null) {
+                    var item = items.Find (i => i.Id == _lastCreatedId);
+                    if (item != null) {
+                        _table.SetEditingItem (item);
+                        Edit (item);
+                    }
+                }
+                Snackbar.Add ($"{T.TableLabel}を追加しました。", Severity.Normal);
+            } else {
+                _lastCreatedId = 0;
+                Snackbar.Add ($"{T.TableLabel}を追加できませんでした。", Severity.Error);
             }
         }
         _isAdding = false;
-        StateHasChanged ();
     }
     protected bool _isAdding;
     protected T _newItem = default!;
+    protected long _lastCreatedId;
 
     /// <summary>新規生成用の新規アイテム生成</summary>
     protected virtual T NewEditItem => new ();
@@ -144,9 +157,13 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         var dialogResult = await DialogService.Confirmation ([$"以下の{T.TableLabel}を完全に削除します。", item.ToString ()], title: $"{T.TableLabel}削除", position: DialogPosition.BottomCenter, acceptionLabel: "Delete", acceptionColor: Color.Error);
         if (dialogResult != null && !dialogResult.Canceled && dialogResult.Data is bool ok && ok) {
             _table.SetEditingItem (null);
-            await DataSet.RemoveAsync (item);
-            StateHasChanged ();
-            Snackbar.Add ($"{T.TableLabel}を削除しました。", Severity.Normal);
+            var result = await DataSet.RemoveAsync (item);
+            if (result.IsSuccess) {
+                StateHasChanged ();
+                Snackbar.Add ($"{T.TableLabel}を削除しました。", Severity.Normal);
+            } else {
+                Snackbar.Add ($"{T.TableLabel}を削除できませんでした。", Severity.Error);
+            }
         }
     }
 

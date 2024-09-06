@@ -27,7 +27,7 @@
                   EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Id)">@(Product.Label [nameof (Product.Id)])</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Category, string?>(x=>x.Name)">@(Product.Label [nameof (Product.CategoryId)])</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, string?>(x=>x.Category (DataSet)?.Name)">@(Product.Label [nameof (Product.CategoryId)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Name)">@(Product.Label [nameof (Product.Name)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label [nameof (Product.Unit)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Product.Label [nameof (Product.Remarks)])</MudTh>
@@ -60,13 +60,13 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Product.Label[nameof(Product.Name)])" />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">
                     <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Unit" />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Product.Label[nameof(Product.Remarks)])" />
                 </MudTd>
             </RowEditingTemplate>
             <PagerContent>
@@ -102,4 +102,19 @@
 @code {
     /// <summary>新規生成用アイテムの生成 最初のカテゴリをデフォルトに使用</summary>
     protected override Product NewEditItem => new Product { CategoryId = DataSet.Categories.Count > 0 ? DataSet.Categories [0].Id : 0 };
+
+    /// <inheritdoc/>
+    protected override async Task AddItem () {
+        await base.AddItem ();
+        if (_lastCreatedId > 0) {
+            var price = new Price { ProductId = _lastCreatedId, StoreId = DataSet.Stores.Count > 0 ? DataSet.Stores [0].Id : 0 };
+            var result = await DataSet.AddAsync (price);
+            if (result.IsSuccess) {
+                await DataSet.LoadAsync ();
+                Snackbar.Add ($"製品の価格を追加しました。", Severity.Success);
+            } else {
+                Snackbar.Add ($"製品の価格を追加できませんでした。", Severity.Error);
+            }
+        }
+    }
 }

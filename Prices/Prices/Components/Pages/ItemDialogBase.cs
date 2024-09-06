@@ -224,7 +224,6 @@ public class ItemDialogBase<TItem1, TItem2> : ComponentBase, IDisposable
     /// <summary>エラー報告</summary>
     protected virtual string ErrorReport {
         get {
-            // ToDo: required
             foreach (var property in typeof (TItem1).GetProperties (BindingFlags.Instance | BindingFlags.Public) ?? []) {
                 if (property.GetCustomAttribute<RequiredAttribute> () != null && property.GetCustomAttribute<ColumnAttribute> () != null) {
                     var value = property.GetValue (Item);

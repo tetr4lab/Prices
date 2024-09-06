@@ -48,10 +48,10 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Store.Label[nameof(Store.Name)])" />
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Store.Label[nameof(Store.Remarks)])" />
                 </MudTd>
             </RowEditingTemplate>
             <PagerContent>
