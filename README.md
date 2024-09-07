@@ -66,7 +66,7 @@ CREATE TABLE `prices` (
   `tax_rate` float NOT NULL COMMENT '税率',
   `product_id` bigint(20) NOT NULL,
   `store_id` bigint(20) NOT NULL,
-  `confirmed` datetime NOT NULL DEFAULT current_timestamp() COMMENT '確認日時',
+  `confirmed` datetime DEFAULT NULL COMMENT '確認日時',
   `remarks` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_product_id_products_id` (`product_id`),
@@ -153,8 +153,6 @@ DELIMITER ;
       - 同じ製品の価格を追加: ボタン
     - 数量: 列フィールド
       - 単位: 列
-    - 確認日時: ピッカー【未実装】
-      - 価格が無効な値から有効な値に更新された日時が自動的に記録されるが、書き換え可能
     - 備考: 列フィールド
     - 編集: 行ボタン
       - 確定: ボタン

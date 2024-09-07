@@ -38,7 +38,6 @@
                     </MudButton>
                 </MudTh>
                 <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.Quantity)])</MudTh>
-
                 <MudTh>@(Price.Label [nameof (Price.Remarks)])</MudTh>
                 @{ lastCategoryId = lastProductId = lastStoreId = 0; }
             </HeaderContent>
@@ -74,7 +73,9 @@
                             @("未記入")
                         } else {
                             var price = DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax;
-                            @($"¥{price:#,0}")
+                            <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateString ()}")">
+                                @($"¥{price:#,0}")
+                            </MudTooltip>
                         }
                     </MudStack>
                 </MudTd>
@@ -83,7 +84,6 @@
                         @(context.Quantity == null ? "未記入" : $"{context.Quantity:#,0}{product?.Unit}")
                     </MudTooltip>
                 </MudTd>
-
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>
             <RowEditingTemplate>
@@ -127,7 +127,6 @@
                     @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
                     <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.End" AdornmentText="@(product?.Unit)" Validation="@(new Func<float?, IEnumerable<string>>(QuantityValidation))" @bind-Value="context.Quantity" />
                 </MudTd>
-
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">
                     <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Price.Label[nameof(Price.Remarks)])" />
                 </MudTd>
@@ -184,6 +183,16 @@
         lastProductId = product?.Id ?? 0;
         lastStoreId = store?.Id ?? 0;
         return (category, product, store, newCategory, newProduct, newStore);
+    }
+
+    /// <summary>編集で単価が有効になったら確認日時を設定</summary>
+    protected override void Commit (object obj) {
+        var item = GetT (obj);
+        if (item.PriceWithTax != null && item.Quantity != null) {
+            item.UnitPrice = item.PriceWithTax / item.Quantity;
+            item.Confirmed = DateTime.Now;
+        }
+        base.Commit (obj);
     }
 
 }

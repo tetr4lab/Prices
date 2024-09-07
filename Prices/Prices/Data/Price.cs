@@ -48,7 +48,7 @@ public class Price : BaseModel<Price>, IBaseModel {
     [Column ("tax_rate"), Required] public float TaxRate { get; set; } = 0;
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
-    [Column ("confirmed"), Required] public DateTime Confirmed { get; set; }
+    [Column ("confirmed")] public DateTime? Confirmed { get; set; } = null;
 
     /// <summary>製品</summary>
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
@@ -81,7 +81,7 @@ public class Price : BaseModel<Price>, IBaseModel {
         $"¥{PriceWithoutTax:#,0}.",
         $"x{Quantity:#,0}.",
         $"{TaxPercentage}%",
-        Confirmed.ToShortDateString (),
+        Confirmed?.ToShortDateString (),
         $"p{ProductId}.", 
         $"s{StoreId}.", 
         Remarks

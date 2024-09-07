@@ -85,7 +85,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected virtual T backupedItem { get; set; }  = new ();
 
     /// <summary>型チェック</summary>
-    private T GetT (object obj) => obj as T ?? throw new ArgumentException ($"The type of the argument '{obj.GetType ()}' does not match the expected type '{typeof (T)}'.");
+    protected T GetT (object obj) => obj as T ?? throw new ArgumentException ($"The type of the argument '{obj.GetType ()}' does not match the expected type '{typeof (T)}'.");
 
     /// <summary>編集開始</summary>
     protected virtual void Edit (object obj) {
