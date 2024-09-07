@@ -32,7 +32,8 @@ public class Price : BaseModel<Price>, IBaseModel {
     public static string BaseSelectSql {
         get {
             var table = PricesDataSet.GetSqlName<Price> ();
-            return $@"select {table}.* from {table}
+            return $@"select {table}.*, CASE WHEN {table}.product_id <> LAG({table}.product_id) OVER (ORDER by {table}.{table}.product_id, unit_price) THEN 1 ELSE 0 END AS is_changed
+                from {table}
                 left join products on products.id = product_id
                 order by products.category_id, product_id, unit_price
                 ;";
@@ -49,6 +50,7 @@ public class Price : BaseModel<Price>, IBaseModel {
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
     [Column ("confirmed")] public DateTime? Confirmed { get; set; } = null;
+    [Column ("is_changed"), VirtualColumn] public int Lowest { get; set; }
 
     /// <summary>製品</summary>
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
@@ -84,6 +86,7 @@ public class Price : BaseModel<Price>, IBaseModel {
         Confirmed?.ToShortDateString (),
         $"p{ProductId}.", 
         $"s{StoreId}.", 
+        Lowest == 1 ? "!!" : "",
         Remarks
     ];
 

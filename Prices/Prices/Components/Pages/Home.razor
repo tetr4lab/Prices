@@ -32,6 +32,9 @@
                 <MudTh>@(Price.Label [nameof (Price.ProductId)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
+                    @if (!FilterText.StartsWith ("!!")) {
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Filter1" OnClick="@(async () => { await SetFilterText.InvokeAsync ("!!"); NavManager.NavigateTo ("./"); })" />
+                    }
                     @(Price.Label [nameof (Price.PriceWithTax)])
                     <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
                         @($"(税{(DataSet.TaxExcluded ? "抜" : "込")})")
