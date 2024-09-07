@@ -45,9 +45,16 @@
             <RowTemplate>
                 @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">@(context.Id)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
+                <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                </MudHidden>
+                <MudHidden Breakpoint="Breakpoint.Xs">
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
+                </MudHidden>
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
                     <MudStack Row>
                         @if (newProduct) {
