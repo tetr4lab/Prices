@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using MudBlazor;
 using System.Xml.Linq;
+using Prices.Components.Pages;
+using System.Data;
 
 namespace Prices.Data;
 
@@ -15,7 +17,7 @@ public class Price : BaseModel<Price>, IBaseModel {
     /// <inheritdoc/>
     public static Dictionary<string, string> Label { get; } = new Dictionary<string, string> {
         { nameof (Id), "ID" },
-        { nameof (PriceWithTax), "価格(税込)" },
+        { nameof (PriceWithTax), "価格" },
         { nameof (Quantity), "数量" },
         { nameof (UnitPrice), "単価" },
         { nameof (TaxRate), "税率" },
@@ -32,7 +34,7 @@ public class Price : BaseModel<Price>, IBaseModel {
             var table = PricesDataSet.GetSqlName<Price> ();
             return $@"select {table}.* from {table}
                 left join products on products.id = product_id
-                order by products.category_id, product_id, price
+                order by products.category_id, product_id, unit_price
                 ;";
         }
     }
@@ -59,12 +61,42 @@ public class Price : BaseModel<Price>, IBaseModel {
 
     /// <summary>税率(%)</summary>
     public int TaxPercentage {
-        get => (int) (TaxRate * 100);
-        set => TaxRate = value / 100f;
+        get => (int) (TaxRate * 100.0f);
+        set => TaxRate = value / 100.0f;
+    }
+
+    /// <summary>税抜き価格</summary>
+    public float? PriceWithoutTax {
+        get => PriceWithTax / (1.0f + TaxRate);
+        set => PriceWithTax = value * (1.0f + TaxRate);
     }
 
     /// 同じ製品の価格数が1(最後のひとつ)なら1、それ以外(まだ他にある)なら0
     public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == ProductId) == 1 ? 1 : 0;
+
+    /// <inheritdoc/>
+    public override string? [] SearchTargets => [
+        $"#{Id}.",
+        $"¥{PriceWithTax:#,0}.",
+        $"¥{PriceWithoutTax:#,0}.",
+        $"x{Quantity:#,0}.",
+        $"{TaxPercentage}%",
+        Confirmed.ToShortDateString (),
+        $"p{ProductId}.", 
+        $"s{StoreId}.", 
+        Remarks
+    ];
+
+    /// <summary>ノーマルコンストラクタ</summary>
+    public Price () { }
+
+    /// 指定の価格を生成
+    public Price (PricesDataSet dataSet, long productId, long storeId = 0) {
+        ProductId = productId;
+        StoreId = storeId > 0 ? storeId : (dataSet.Stores.Count > 0 ? dataSet.Stores.Last ().Id : 0);
+        var categoryId = dataSet.Products.Find (i => i.Id == productId)?.CategoryId;
+        TaxRate = categoryId == null ? 0 : dataSet.Categories.Find (i => i.Id == categoryId)?.TaxRate ?? 0;
+    }
 
     /// <inheritdoc/>
     public override Price Clone () {

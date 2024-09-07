@@ -11,25 +11,26 @@
 } else {
     if (items.Count > 0) {
         <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
-                  SortLabel="⇅"
-                  AllowUnsorted="true"
-                  @bind-SelectedItem="selectedItem"
-                  CommitEditTooltip="保存"
-                  CancelEditTooltip="取消"
-                  RowEditPreview="Edit"
-                  RowEditCancel="Cancel"
-                  RowEditCommit="Commit"
-                  ReadOnly="false"
-                  CanCancelEdit="true"
-                  IsEditRowSwitchingBlocked="true"
-                  ApplyButtonPosition="TableApplyButtonPosition.End"
-                  EditButtonPosition="TableEditButtonPosition.End"
-                  EditTrigger="TableEditTrigger.EditButton">
+                Filter="new Func<Product, bool> (FilterFunc)"
+                SortLabel="⇅"
+                AllowUnsorted="true"
+                @bind-SelectedItem="selectedItem"
+                CommitEditTooltip="保存"
+                CancelEditTooltip="取消"
+                RowEditPreview="Edit"
+                RowEditCancel="Cancel"
+                RowEditCommit="Commit"
+                ReadOnly="false"
+                CanCancelEdit="true"
+                IsEditRowSwitchingBlocked="true"
+                ApplyButtonPosition="TableApplyButtonPosition.End"
+                EditButtonPosition="TableEditButtonPosition.End"
+                EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Id)">@(Product.Label [nameof (Product.Id)])</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Id)">@(Product.Label [nameof (Product.Id)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, string?>(x=>x.Category (DataSet)?.Name)">@(Product.Label [nameof (Product.CategoryId)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Name)">@(Product.Label [nameof (Product.Name)])</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label [nameof (Product.Unit)])</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label [nameof (Product.Unit)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Product.Label [nameof (Product.Remarks)])</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -85,16 +86,16 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <NewItem TItem="Product" DisableAdd="@(_isAdding || !PricesDataSet.EntityIsValid (_newItem))" OnAddItem="AddItem">
+    <NewItem TItem="Product" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
         <MudItem Style="width: 20em;">
-            <MudSelect Class="mr-3" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="_newItem.CategoryId">
+            <MudSelect Class="mr-3" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="newItem.CategoryId">
                 @foreach (var category in DataSet.Categories) {
                     <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
         <MudItem Style="width: 20em;">
-            <MudTextField Class="mr-3" Typo="Typo.body2" T="string" Label="adding product name" @bind-Value="_newItem.Name" />
+            <MudTextField Class="mr-3" Typo="Typo.body2" T="string" Label="adding product name" @bind-Value="newItem.Name" />
         </MudItem>
     </NewItem>
 }
@@ -106,8 +107,8 @@
     /// <inheritdoc/>
     protected override async Task AddItem () {
         await base.AddItem ();
-        if (_lastCreatedId > 0) {
-            var price = new Price { ProductId = _lastCreatedId, StoreId = DataSet.Stores.Count > 0 ? DataSet.Stores [0].Id : 0 };
+        if (lastCreatedId > 0) {
+            var price = new Price (DataSet, lastCreatedId);
             var result = await DataSet.AddAsync (price);
             if (result.IsSuccess) {
                 await DataSet.LoadAsync ();

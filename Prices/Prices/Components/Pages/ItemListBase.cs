@@ -39,7 +39,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
         // セッション数の変化を購読
         SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
-        _newItem = NewEditItem;
+        newItem = NewEditItem;
     }
 
     /// <summary>破棄</summary>
@@ -88,7 +88,6 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected virtual void Edit (object obj) {
         var item = GetT (obj);
         backupedItem = item.Clone ();
-        System.Diagnostics.Debug.WriteLine ($"Edit {backupedItem}");
     }
 
     /// <summary>編集完了</summary>
@@ -97,11 +96,13 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         if (EntityIsValid (item) && !backupedItem.Equals (item)) {
             var result = await DataSet.UpdateAsync (item);
             if (result.IsSuccess) {
+                await ReloadAndFocus (item.Id);
                 Snackbar.Add ($"{T.TableLabel}を更新しました。", Severity.Normal);
             } else {
                 Snackbar.Add ($"{T.TableLabel}を更新できませんでした。", Severity.Error);
             }
         }
+        StateHasChanged ();
     }
 
     /// <summary>編集取消</summary>
@@ -112,38 +113,52 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         }
         StateHasChanged ();
     }
-    //protected bool _canCancelEdit;
 
     /// <summary>項目追加</summary>
     protected virtual async Task AddItem () {
-        if (_isAdding || items == null) { return; }
-        _isAdding = true;
+        if (isAdding || items == null) { return; }
+        isAdding = true;
         await StateHasChangedAsync ();
-        if (EntityIsValid (_newItem)) {
-            var result = await DataSet.AddAsync (_newItem);
-            if (result.IsSuccess && _table != null) {
-                _lastCreatedId = result.Value.Id;
-                await DataSet.LoadAsync ();
-                await StateHasChangedAsync ();
-                _newItem = NewEditItem;
-                if (items != null) {
-                    var item = items.Find (i => i.Id == _lastCreatedId);
-                    if (item != null) {
-                        _table.SetEditingItem (item);
-                        Edit (item);
-                    }
-                }
+        if (EntityIsValid (newItem)) {
+            var result = await DataSet.AddAsync (newItem);
+            if (result.IsSuccess) {
+                lastCreatedId = result.Value.Id;
+                await ReloadAndFocus (lastCreatedId, editing: true);
                 Snackbar.Add ($"{T.TableLabel}を追加しました。", Severity.Normal);
             } else {
-                _lastCreatedId = 0;
+                lastCreatedId = 0;
                 Snackbar.Add ($"{T.TableLabel}を追加できませんでした。", Severity.Error);
             }
+            newItem = NewEditItem;
         }
-        _isAdding = false;
+        isAdding = false;
     }
-    protected bool _isAdding;
-    protected T _newItem = default!;
-    protected long _lastCreatedId;
+
+    /// <summary>項目追加の排他制御</summary>
+    protected bool isAdding;
+
+    /// <summary>追加対象の事前編集</summary>
+    protected T newItem = default!;
+
+    /// <summary>最後に追加された項目Id</summary>
+    protected long lastCreatedId;
+
+    /// <summary>リロードして元の位置へ戻る</summary>
+    protected virtual async Task ReloadAndFocus (long focusedId, bool editing = false) {
+        await DataSet.LoadAsync ();
+        await StateHasChangedAsync ();
+        if (items != null && _table != null) {
+            var focused = items.Find (i => i.Id == focusedId);
+            if (focused != null) {
+                if (editing) {
+                    _table.SetEditingItem (focused);
+                    Edit (focused);
+                } else {
+                    _table.SetSelectedItem (focused);
+                }
+            }
+        }
+    }
 
     /// <summary>新規生成用の新規アイテム生成</summary>
     protected virtual T NewEditItem => new ();
@@ -164,6 +179,49 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
             } else {
                 Snackbar.Add ($"{T.TableLabel}を削除できませんでした。", Severity.Error);
             }
+        }
+    }
+
+    /// <summary>全ての検索語に対して対象列のどれかが真であれば真を返す</summary>
+    protected bool FilterFunc (T item) {
+        if (item != null && FilterText != null) {
+            foreach (var word in FilterText.Split ([' ', '　', '\t', '\n'])) {
+                if (!string.IsNullOrEmpty (word) && !Any (item.SearchTargets, word)) { return false; }
+            }
+            return true;
+        }
+        return false;
+        // 対象カラムのどれかが検索語に適合すれば真を返す
+        bool Any (IEnumerable<string?> targets, string word) {
+            var eq = word.StartsWith ('=');
+            word = word [(eq ? 1 : 0)..];
+            var or = word.Split ('|');
+            foreach (var target in targets) {
+                if (!string.IsNullOrEmpty (target)) {
+                    if (eq) {
+                        // 検索語が'='で始まる場合は、以降がカラムと完全一致する場合に真を返す
+                        if (or.Length > 1) {
+                            // 検索語が'|'を含む場合は、'|'で分割したいずれかの部分と一致する場合に真を返す
+                            foreach (var wd in or) {
+                                if (target == wd) { return true; }
+                            }
+                        } else {
+                            if (target == word) { return true; }
+                        }
+                    } else {
+                        // 検索語がカラムに含まれる場合に真を返す
+                        if (or.Length > 1) {
+                            // 検索語が'|'を含む場合は、'|'で分割したいずれかの部分がカラムに含まれる場合に真を返す
+                            foreach (var wd in or) {
+                                if (target.Contains (wd)) { return true; }
+                            }
+                        } else {
+                            if (target.Contains (word)) { return true; }
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 

@@ -34,21 +34,26 @@ public class Category : BaseModel<Category>, IBaseModel {
         }
     }
 
-    /// <inheritdoc/>
-    public static string UniqueKeysSql => "";
-
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("is_food"), Required] public bool IsFood { get; set; } = false;
     [Column ("tax_rate"), Required] public float TaxRate { get; set; } = TaxRateForNonFood;
 
     /// <summary>税率(%)</summary>
     public int TaxPercentage {
-        get => (int) (TaxRate * 100);
-        set => TaxRate = value / 100f;
+        get => (int) (TaxRate * 100.0f);
+        set => TaxRate = value / 100.0f;
     }
 
     /// <inheritdoc/>
     public override int ReferenceCount (PricesDataSet set) => set.Products.Count (i => i.CategoryId == Id);
+
+    /// <inheritdoc/>
+    public override string? [] SearchTargets => [
+        $"c{Id}.",
+        Name,
+        IsFood ? "food" : "not food",
+        Remarks
+    ];
 
     /// <inheritdoc/>
     public override Category Clone () {

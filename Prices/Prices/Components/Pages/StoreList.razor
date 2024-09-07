@@ -11,23 +11,23 @@
 } else {
     if (items.Count > 0) {
         <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
-            SortLabel="⇅"
-            AllowUnsorted="true"
-            @bind-SelectedItem="selectedItem"
-            CommitEditTooltip="保存"
-            CancelEditTooltip="取消"
-            RowEditPreview="Edit"
-            RowEditCancel="Cancel"
-            RowEditCommit="Commit"
-            ReadOnly="false"
-            CanCancelEdit="true"
-            IsEditRowSwitchingBlocked="true"
-            ApplyButtonPosition="TableApplyButtonPosition.End"
-            EditButtonPosition="TableEditButtonPosition.End"
-            EditTrigger="TableEditTrigger.EditButton"
-        >
+                Filter="new Func<Store, bool> (FilterFunc)"
+                SortLabel="⇅"
+                AllowUnsorted="true"
+                @bind-SelectedItem="selectedItem"
+                CommitEditTooltip="保存"
+                CancelEditTooltip="取消"
+                RowEditPreview="Edit"
+                RowEditCancel="Cancel"
+                RowEditCommit="Commit"
+                ReadOnly="false"
+                CanCancelEdit="true"
+                IsEditRowSwitchingBlocked="true"
+                ApplyButtonPosition="TableApplyButtonPosition.End"
+                EditButtonPosition="TableEditButtonPosition.End"
+                EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<Store, object>(x=>x.Id)">@(Store.Label[nameof (Store.Id)])</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Store, object>(x=>x.Id)">@(Store.Label [nameof (Store.Id)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Store, string?>(x=>x.Name)">@(Store.Label [nameof (Store.Name)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Store.Label[nameof (Store.Remarks)])</MudTh>
             </HeaderContent>
@@ -70,9 +70,9 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <NewItem TItem="Store" DisableAdd="@(_isAdding || !PricesDataSet.EntityIsValid (_newItem))" OnAddItem="AddItem">
+    <NewItem TItem="Store" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
         <MudItem Style="width: 20em;">
-            <MudTextField Typo="Typo.body2" T="string" Label="adding store name" @bind-Value="_newItem.Name" />
+            <MudTextField Typo="Typo.body2" T="string" Label="adding store name" @bind-Value="newItem.Name" />
         </MudItem>
     </NewItem>
 }

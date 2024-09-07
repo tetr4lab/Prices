@@ -48,6 +48,15 @@ public class Product : BaseModel<Product>, IBaseModel {
     public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.ProductId == Id);
 
     /// <inheritdoc/>
+    public override string? [] SearchTargets => [
+        $"p{Id}.",
+        Name,
+        $"c{CategoryId}.",
+        Unit,
+        Remarks
+    ];
+
+    /// <inheritdoc/>
     public override Product Clone () {
         var item = base.Clone ();
         item.Name = Name;

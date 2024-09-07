@@ -38,6 +38,9 @@ public abstract class BaseModel<T> : IEquatable<T> where T : BaseModel<T>, new()
     /// <summary>参照数</summary>
     public abstract int ReferenceCount (PricesDataSet set);
 
+    /// <summary>検索対象 (複数のカラムを参照)</summary>
+    public abstract string? [] SearchTargets { get; }
+
     /// <summary>クローン</summary>
     public virtual T Clone ()
         => new T {

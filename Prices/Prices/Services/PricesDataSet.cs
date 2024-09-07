@@ -58,7 +58,11 @@ public sealed class PricesDataSet {
     public bool IsReady => IsInitialized && !isLoading;
 
     /// <summary>初期化に失敗</summary>
-    public bool IsUnavailable {  get; private set; }
+    public bool IsUnavailable { get; private set; }
+
+    /// <summary>表示と編集を抜きで行う (通常は税込みで行う)</summary>
+    /// <remarks>本来は、独立したサービスとして構成すべきセッション毎の設定</remarks>
+    public bool TaxExcluded { get; set; }
 
     /// <summary>(再)読み込み</summary>
     /// <remarks>既に読み込み中なら単に完了を待って戻る、再読み込み中でも以前のデータが有効</remarks>
