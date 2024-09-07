@@ -19,7 +19,10 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
 
     /// <summary>検索文字列</summary>
-    [CascadingParameter (Name = "Filter")] protected string? FilterText { get; set; }
+    [CascadingParameter (Name = "Filter")] protected string FilterText { get; set; } = string.Empty;
+
+    /// <summary>検索文字列設定</summary>
+    [CascadingParameter (Name = "SetFilter")] protected EventCallback<string> SetFilterText { get; set; }
 
     /// <summary>セクションラベル設定</summary>
     [CascadingParameter (Name = "Section")] protected EventCallback<string> SetSectionTitle { get; set; }

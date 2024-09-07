@@ -34,7 +34,15 @@
                 <MudTh>@(Category.Label [nameof (Category.Remarks)])</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.Id)])">@context.Id</MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.Id)])">
+                    <MudStack Row>
+                        <MudTooltip Text="製品を一覧" Duration="1000">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ShoppingBasket" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"c{context.Id}."); NavManager.NavigateTo ("products"); })" />
+                        </MudTooltip>
+                        <MudSpacer />
+                        @context.Id
+                    </MudStack>
+                </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.Name)])">@(context.Name)</MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.IsFood)])">@(context.IsFood ? "✔" : "")</MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.TaxRate)])">@($"{context.TaxRate * 100:F0}%")</MudTd>

@@ -32,7 +32,15 @@
                 <MudTh>@(Store.Label[nameof (Store.Remarks)])</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">@context.Id</MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">
+                    <MudStack Row>
+                        <MudTooltip Text="価格を一覧" Duration="1000">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"s{context.Id}."); NavManager.NavigateTo ("./"); })" />
+                        </MudTooltip>
+                        <MudSpacer />
+                        @context.Id
+                    </MudStack>
+                </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">@(context.Name)</MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>

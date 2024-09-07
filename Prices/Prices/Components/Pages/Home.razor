@@ -52,14 +52,21 @@
                 </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.Xs">
                     <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">
+                        @if (newProduct) {
+                            @(product?.Name)
+                            <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.ProductId}."); NavManager.NavigateTo ("./"); })" />
+                            </MudTooltip>
+                        }
+                    </MudTd>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
                 </MudHidden>
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
                     <MudStack Row>
                         @if (newProduct) {
                             <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                                <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Filled.AddCircleOutline" Class="pa-0" OnClick="() => AddSameItem (context.ProductId, context.StoreId)" />
+                                <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="() => AddSameItem (context.ProductId, context.StoreId)" />
                             </MudTooltip>
                         }
                         <MudSpacer />
@@ -130,7 +137,7 @@
             </PagerContent>
             <EditButtonContent Context="button">
                 <MudTooltip Text="編集" Duration="1000">
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
                 </MudTooltip>
             </EditButtonContent>
         </MudTable>

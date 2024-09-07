@@ -46,7 +46,7 @@
         <MudStack Row Class="align-center">
             <MudTooltip Duration="1000">
                 <ChildContent>
-                    <MudTextField @bind-Value="_filterText" @ref="searchField"
+                    <MudTextField @bind-Value="FilterText" @ref="searchField"
                         OnKeyUp="OnKeyUp"
                         OnBlur="OnClick"
                         OnAdornmentClick="OnClick" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
@@ -80,6 +80,8 @@
     [Parameter] public bool IsDarkMode { get; set; }
     /// <summary>モード切替ボタンが押されたときの処理</summary>
     [Parameter] public EventCallback OnClickChangeModeButton { get; set; } = EventCallback.Empty;
+    /// <summary>検索文字列</summary>
+    [CascadingParameter (Name = "Filter")] protected string FilterText { get; set; } = string.Empty;
 
     /// <summary>
     /// ホームページの判定
@@ -91,12 +93,6 @@
     /// <summary>検索フィールドへの参照</summary>
     private MudTextField<string> searchField { get; set; } = new MudTextField<string>();
 
-    /// <summary>検索文字列</summary>
-    private string _filterText = string.Empty;
-
-    /// <summary>前回の検索文字列</summary>
-    private string _lastFilterText = string.Empty;
-
     /// <summary>検索フィールドでキーが押された</summary>
     protected void OnKeyUp (KeyboardEventArgs eventArgs) {
         if (eventArgs.Key == "Enter") {
@@ -106,11 +102,8 @@
 
     /// <summary>検索ボタン(またはフィールドクリアボタン)が押された</summary>
     public void OnClick () {
-        if (_lastFilterText != _filterText) {
-            OnClickSearchButton.InvokeAsync(_filterText);
-            _lastFilterText = _filterText;
-            searchField.BlurAsync();
-        }
+        OnClickSearchButton.InvokeAsync(FilterText);
+        searchField.BlurAsync();
     }
 
 }
