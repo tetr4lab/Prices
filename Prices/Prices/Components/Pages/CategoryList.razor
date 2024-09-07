@@ -80,11 +80,11 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <NewItem TItem="Category" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
+    <ItemListFooter TItem="Category" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
         <MudItem Style="width: 20em;">
             <MudTextField Typo="Typo.body2" T="string" Label="adding category name" @bind-Value="newItem.Name" />
         </MudItem>
-    </NewItem>
+    </ItemListFooter>
 }
 
 @code{

@@ -86,7 +86,7 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <NewItem TItem="Product" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
+    <ItemListFooter TItem="Product" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
         <MudItem Style="width: 20em;">
             <MudSelect Class="mr-3" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="newItem.CategoryId">
                 @foreach (var category in DataSet.Categories) {
@@ -97,7 +97,7 @@
         <MudItem Style="width: 20em;">
             <MudTextField Class="mr-3" Typo="Typo.body2" T="string" Label="adding product name" @bind-Value="newItem.Name" />
         </MudItem>
-    </NewItem>
+    </ItemListFooter>
 }
 
 @code {
