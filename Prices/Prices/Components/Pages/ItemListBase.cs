@@ -47,6 +47,9 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
 
     /// <summary>破棄</summary>
     public void Dispose () {
+        if (editingItem != null) {
+            Cancel (editingItem);
+        }
         SessionCounter.Unsubscribe (this);
     }
 
@@ -84,6 +87,9 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     /// <summary>バックアップ</summary>
     protected virtual T backupedItem { get; set; }  = new ();
 
+    /// <summary>編集対象アイテム</summary>
+    protected T? editingItem;
+
     /// <summary>型チェック</summary>
     protected T GetT (object obj) => obj as T ?? throw new ArgumentException ($"The type of the argument '{obj.GetType ()}' does not match the expected type '{typeof (T)}'.");
 
@@ -91,6 +97,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected virtual void Edit (object obj) {
         var item = GetT (obj);
         backupedItem = item.Clone ();
+        editingItem = item;
     }
 
     /// <summary>編集完了</summary>
@@ -105,6 +112,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
                 Snackbar.Add ($"{T.TableLabel}を更新できませんでした。", Severity.Error);
             }
         }
+        editingItem = null;
         StateHasChanged ();
     }
 
@@ -114,6 +122,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         if (!backupedItem.Equals (item)) {
             backupedItem.CopyTo (item);
         }
+        editingItem = null;
         StateHasChanged ();
     }
 
