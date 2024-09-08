@@ -24,19 +24,21 @@ public class Category : BaseModel<Category>, IBaseModel {
         { nameof (IsFood), "食品" },
         { nameof (TaxRate), "税率"},
         { nameof (Remarks), "備考" },
+        { nameof (Priority), "優先順" },
     };
 
     /// <inheritdoc/>
     public static string BaseSelectSql {
         get {
             var table = PricesDataSet.GetSqlName<Category> ();
-            return $"select {table}.* from {table} order by id;";
+            return $"select {table}.* from {table} order by priority desc, name;";
         }
     }
 
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("is_food"), Required] public bool IsFood { get; set; } = false;
     [Column ("tax_rate"), Required] public float TaxRate { get; set; } = TaxRateForNonFood;
+    [Column ("priority")] public int? Priority { get; set; } = null;
 
     /// <summary>税率(%)</summary>
     public int TaxPercentage {
@@ -49,9 +51,10 @@ public class Category : BaseModel<Category>, IBaseModel {
 
     /// <inheritdoc/>
     public override string? [] SearchTargets => [
+        $"y{Priority}.",
         $"c{Id}.",
         Name,
-        IsFood ? "food" : "not food",
+        IsFood ? "is_food" : "not_food",
         Remarks
     ];
 
@@ -61,6 +64,7 @@ public class Category : BaseModel<Category>, IBaseModel {
         item.Name = Name;
         item.IsFood = IsFood;
         item.TaxRate = TaxRate;
+        item.Priority = Priority;
         return item;
     }
 
@@ -69,6 +73,7 @@ public class Category : BaseModel<Category>, IBaseModel {
         destination.Name = Name;
         destination.IsFood = IsFood;
         destination.TaxRate = TaxRate;
+        destination.Priority = Priority;
         return base.CopyTo (destination);
     }
 
@@ -80,6 +85,7 @@ public class Category : BaseModel<Category>, IBaseModel {
         && IsFood == other.IsFood
         && TaxRate == other.TaxRate
         && Remarks == other.Remarks
+        && Priority == other.Priority
     ;
 
     /// <inheritdoc/>

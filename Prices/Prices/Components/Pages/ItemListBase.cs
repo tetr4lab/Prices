@@ -98,6 +98,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         var item = GetT (obj);
         backupedItem = item.Clone ();
         editingItem = item;
+        StateHasChanged ();
     }
 
     /// <summary>編集完了</summary>
@@ -234,6 +235,15 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
                 }
             }
             return false;
+        }
+    }
+
+    //// <summary>表示されている全アイテムで絞りこんで次のページを表示</summary>
+    protected async Task FilterAndNavigate (string mark, string uri) {
+        if (_table != null) {
+            var filter = string.Join ('|', _table.FilteredItems.ToList ().ConvertAll (context => $"{mark}{context.Id}."));
+            await SetFilterText.InvokeAsync (filter);
+            NavManager.NavigateTo (uri);
         }
     }
 

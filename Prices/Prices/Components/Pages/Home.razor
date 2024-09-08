@@ -27,13 +27,15 @@
                 EditButtonPosition="TableEditButtonPosition.End"
                 EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTh Style="width: 8em;">@(Price.Label [nameof (Price.Id)])</MudTh>
+                <MudTd></MudTd>
                 <MudTh>@(Price.Label [nameof (Price.Category)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.ProductId)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
                     @if (!FilterText.StartsWith ("!!")) {
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Filter1" OnClick="@(async () => { await SetFilterText.InvokeAsync ("!!"); NavManager.NavigateTo ("./"); })" />
+                        <MudTooltip Text="最安値のみ" Duration="1000">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Filter1" OnClick="@(async () => { await SetFilterText.InvokeAsync ("!!"); NavManager.NavigateTo ("./"); })" />
+                        </MudTooltip>
                     }
                     @(Price.Label [nameof (Price.PriceWithTax)])
                     <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
@@ -46,7 +48,13 @@
             </HeaderContent>
             <RowTemplate>
                 @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">@(context.Id)</MudTd>
+                <MudTd>
+                    @if (newProduct) {
+                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.ProductId}."); NavManager.NavigateTo ("./"); })" />
+                        </MudTooltip>
+                    }
+                </MudTd>
                 <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
                     <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
@@ -54,14 +62,7 @@
                 </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.Xs">
                     <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">
-                        @if (newProduct) {
-                            @(product?.Name)
-                            <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.ProductId}."); NavManager.NavigateTo ("./"); })" />
-                            </MudTooltip>
-                        }
-                    </MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
                 </MudHidden>
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
@@ -91,15 +92,11 @@
             </RowTemplate>
             <RowEditingTemplate>
                 @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Id)])">
+                <MudTd>
                     @{ var disable = context.ReferenceCount (DataSet) > 0; }
-                    <MudStack Row>
-                        <MudTooltip Text="@(disable ? "最後につき削除不可" : "削除")" Duration="1000">
-                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
-                        </MudTooltip>
-                        <MudSpacer />
-                        @context.Id
-                    </MudStack>
+                    <MudTooltip Text="@(disable ? "最後につき削除不可" : "削除")" Duration="1000">
+                        <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                    </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(context.Category (DataSet)?.Name)</MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">

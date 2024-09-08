@@ -17,13 +17,14 @@ public class Store : BaseModel<Store>, IBaseModel {
         { nameof (Id), "ID" },
         { nameof (Name), "店名" },
         { nameof (Remarks), "備考" },
+        { nameof (Priority), "優先順" },
     };
 
     /// <inheritdoc/>
     public static string BaseSelectSql {
         get {
             var table = PricesDataSet.GetSqlName<Store> ();
-            return $"select {table}.* from {table} order by id;";
+            return $"select {table}.* from {table} order by priority desc, name;";
         }
     }
 
@@ -31,12 +32,14 @@ public class Store : BaseModel<Store>, IBaseModel {
     public static string UniqueKeysSql => "";
 
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
+    [Column ("priority")] public int? Priority { get; set; } = null;
 
     /// <inheritdoc/>
     public override int ReferenceCount (PricesDataSet set) => set.Prices.Count (i => i.StoreId == Id);
 
     /// <inheritdoc/>
     public override string? [] SearchTargets => [
+        $"y{Priority}.",
         $"s{Id}.",
         Name,
         Remarks
@@ -46,12 +49,14 @@ public class Store : BaseModel<Store>, IBaseModel {
     public override Store Clone () {
         var item = base.Clone ();
         item.Name = Name;
+        item.Priority = Priority;
         return item;
     }
 
     /// <inheritdoc/>
     public override Store CopyTo (Store destination) {
         destination.Name = Name;
+        destination.Priority = Priority;
         return base.CopyTo (destination);
     }
 
@@ -61,6 +66,7 @@ public class Store : BaseModel<Store>, IBaseModel {
         && Id == other.Id
         && Name == other.Name
         && Remarks == other.Remarks
+        && Priority == other.Priority
     ;
 
     /// <inheritdoc/>

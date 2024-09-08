@@ -18,13 +18,14 @@ public class Product : BaseModel<Product>, IBaseModel {
         { nameof (CategoryId), "カテゴリ" },
         { nameof (Unit), "単位" },
         { nameof (Remarks), "備考" },
+        { nameof (Priority), "優先順" },
     };
 
     /// <inheritdoc/>
     public static string BaseSelectSql {
         get {
             var table = PricesDataSet.GetSqlName<Product> ();
-            return $"select {table}.* from {table} order by id;";
+            return $"select {table}.* from {table} order by priority desc, name;";
         }
     }
 
@@ -34,6 +35,7 @@ public class Product : BaseModel<Product>, IBaseModel {
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("category_id"), Required] public long CategoryId { get; set; } = 0;
     [Column ("unit"), StringLength (50)] public string? Unit { get; set; }
+    [Column ("priority")] public int? Priority { get; set; } = null;
 
     /// <summary>カテゴリ get</summary>
     public Category? Category (PricesDataSet dataSet) => dataSet.Categories.Find (i => i.Id == CategoryId);
@@ -49,6 +51,7 @@ public class Product : BaseModel<Product>, IBaseModel {
 
     /// <inheritdoc/>
     public override string? [] SearchTargets => [
+        $"y{Priority}.",
         $"p{Id}.",
         Name,
         $"c{CategoryId}.",
@@ -62,6 +65,7 @@ public class Product : BaseModel<Product>, IBaseModel {
         item.Name = Name;
         item.CategoryId = CategoryId;
         item.Unit = Unit;
+        item.Priority = Priority;
         return item;
     }
 
@@ -70,6 +74,7 @@ public class Product : BaseModel<Product>, IBaseModel {
         destination.Name = Name;
         destination.CategoryId = CategoryId;
         destination.Unit = Unit;
+        destination.Priority = Priority;
         return base.CopyTo (destination);
     }
 
@@ -81,6 +86,7 @@ public class Product : BaseModel<Product>, IBaseModel {
         && CategoryId == other.CategoryId
         && Unit == other.Unit
         && Remarks == other.Remarks
+        && Priority == other.Priority
     ;
 
     /// <inheritdoc/>

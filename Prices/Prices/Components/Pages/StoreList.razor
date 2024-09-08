@@ -27,32 +27,38 @@
                 EditButtonPosition="TableEditButtonPosition.End"
                 EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Store, object>(x=>x.Id)">@(Store.Label [nameof (Store.Id)])</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Store, string?>(x=>x.Name)">@(Store.Label [nameof (Store.Name)])</MudTableSortLabel></MudTh>
+                <MudTh Style="width: 8em;">
+                    <MudStack Row>
+                        <MudTooltip Text="全ての価格を一覧" Duration="1000">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("s", "./"))" />
+                        </MudTooltip>
+                        <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Store, object>(x=>x.Priority ?? 0)"><MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small" /></MudTableSortLabel>
+                    </MudStack>
+                </MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Store, string?>(x=>x.Name)">@(Store.Label [nameof (Store.Name)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Store.Label[nameof (Store.Remarks)])</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Priority)])">
                     <MudStack Row>
                         <MudTooltip Text="価格を一覧" Duration="1000">
                             <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"s{context.Id}."); NavManager.NavigateTo ("./"); })" />
                         </MudTooltip>
                         <MudSpacer />
-                        @context.Id
+                        @context.Priority
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">@(context.Name)</MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>
             <RowEditingTemplate>
-                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Id)])">
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Priority)])">
                     @{var disable = context.ReferenceCount (DataSet) > 0;}
-                    <MudStack Row>
+                    <MudStack Row Class="align-center">
                         <MudTooltip Text="@(disable ? "使用中につき削除不可" : "削除")" Duration="1000">
                             <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
                         </MudTooltip>
-                        <MudSpacer />
-                        @context.Id
+                        <MudNumericField Typo="Typo.body2" T="int?" Min="0" Max="99" HideSpinButtons="true" @bind-value="context.Priority" />
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">

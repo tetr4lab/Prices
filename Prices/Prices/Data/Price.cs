@@ -32,10 +32,11 @@ public class Price : BaseModel<Price>, IBaseModel {
     public static string BaseSelectSql {
         get {
             var table = PricesDataSet.GetSqlName<Price> ();
-            return $@"select {table}.*, CASE WHEN {table}.product_id <> LAG({table}.product_id) OVER (ORDER by {table}.{table}.product_id, unit_price) THEN 1 ELSE 0 END AS is_changed
+            return $@"select {table}.*, CASE WHEN {table}.product_id <> LAG({table}.product_id) OVER (order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price) THEN 1 ELSE 0 END AS is_changed
                 from {table}
-                left join products on products.id = product_id
-                order by products.category_id, product_id, unit_price
+                left join products on products.id = {table}.product_id
+                left join categories on categories.id = products.category_id
+                order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price
                 ;";
         }
     }
