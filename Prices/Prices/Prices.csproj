@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="revision.info" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="revision.info" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Prices.Client\Prices.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
@@ -15,6 +23,10 @@
     <PackageReference Include="MySqlConnector" Version="2.3.7" />
     <PackageReference Include="PetaPoco.Compiled" Version="6.0.677" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="git branch --show-current &gt; $(ProjectDir)revision.info&#xD;&#xA;git rev-parse --short HEAD &gt;&gt; $(ProjectDir)revision.info&#xD;&#xA;" />
+  </Target>
 
   <Target Name="CustomAfterPublish" AfterTargets="Publish">
     <Exec Command="powershell -File $(ProjectDir)deploy.ps1" Condition="Exists('$(ProjectDir)deploy.ps1')" />
