@@ -49,9 +49,10 @@
             <RowTemplate>
                 @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
                 <MudTd>
+                    @{ var filterText = $"p{context.ProductId}."; }
                     @if (newProduct) {
                         <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.ProductId}."); NavManager.NavigateTo ("./"); })" />
+                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
                         </MudTooltip>
                     }
                 </MudTd>
