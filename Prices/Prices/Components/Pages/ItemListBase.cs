@@ -75,14 +75,20 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected override Task OnAfterRenderAsync (bool firstRender) {
         if (_table != null && !_inited) {
             _inited = true;
-            _table.SetRowsPerPage (_pageSizeOptions [1]);
+            _table.SetRowsPerPage (_pageSizeOptions [_initialPageSizeIndex]);
         }
         return base.OnAfterRenderAsync (firstRender);
     }
     protected bool _inited;
+
+    /// <summary>テーブル</summary>
     protected MudTable<T>? _table;
+
+    /// <summary>初期項目数のインデックス</summary>
+    protected virtual int _initialPageSizeIndex => 1;
+
     /// <summary>項目数の選択肢</summary>
-    protected int [] _pageSizeOptions = { 10, 20, 25, 50, 100, 200, MaxListingNumber, };
+    protected virtual int [] _pageSizeOptions { get; } = { 10, 20, 30, 50, 100, 200, MaxListingNumber, };
 
     /// <summary>バックアップ</summary>
     protected virtual T backupedItem { get; set; }  = new ();

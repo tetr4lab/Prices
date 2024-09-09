@@ -10,7 +10,7 @@
     <MudProgressCircular Indeterminate="true" />
 } else {
     if (items.Count > 0) {
-        <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
+        <MudTable Items="items" Dense Hover Bordered Breakpoint="Breakpoint.Xs" @ref="_table"
                 Filter="new Func<Price, bool> (FilterFunc)"
                 SortLabel="⇅"
                 AllowUnsorted="true"
@@ -20,6 +20,8 @@
                 RowEditPreview="Edit"
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
+                GroupBy="groupDefinition"
+                GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
                 ReadOnly="false"
                 CanCancelEdit="true"
                 IsEditRowSwitchingBlocked="true"
@@ -27,16 +29,11 @@
                 EditButtonPosition="TableEditButtonPosition.End"
                 EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTd></MudTd>
+                @{ CheckPageChangedAndCollapse (); }
                 <MudTh>@(Price.Label [nameof (Price.Category)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.ProductId)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
-                    @if (!FilterText.StartsWith ("!!")) {
-                        <MudTooltip Text="最安値のみ" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Filter1" OnClick="@(async () => { await SetFilterText.InvokeAsync ("!!"); NavManager.NavigateTo ("./"); })" />
-                        </MudTooltip>
-                    }
                     @(Price.Label [nameof (Price.PriceWithTax)])
                     <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
                         @($"(税{(DataSet.TaxExcluded ? "抜" : "込")})")
@@ -46,43 +43,63 @@
                 <MudTh>@(Price.Label [nameof (Price.Remarks)])</MudTh>
                 @{ lastCategoryId = lastProductId = lastStoreId = 0; }
             </HeaderContent>
-            <RowTemplate>
-                @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
-                <MudTd>
-                    @{ var filterText = $"p{context.ProductId}."; }
-                    @if (newProduct) {
-                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+            <GroupHeaderTemplate>
+                @{
+                    var price = context.Items.First ();
+                    var (category, product, store) = GetRelations (price);
+                }
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
+                    @if (price.PriceWithTax == null) {
+                        @("未記入")
+                    } else {
+                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {price.Confirmed?.ToShortDateString ()}")">
+                            @($"¥{(DataSet.TaxExcluded ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
                         </MudTooltip>
                     }
                 </MudTd>
-                <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
-                </MudHidden>
-                <MudHidden Breakpoint="Breakpoint.Xs">
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
-                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
-                </MudHidden>
-                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
+                    <MudTooltip Text="@(price.UnitPrice == null ? "未記入" : $"¥{price.UnitPrice}")" Duration="1000">
+                        @(price.Quantity == null ? "未記入" : $"{price.Quantity:#,0}{product?.Unit}")
+                    </MudTooltip>
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@(price.Remarks)</MudTd>
+            </GroupHeaderTemplate>
+            <GroupFooterTemplate>
+                @{
+                    var price = context.Items.First ();
+                    var filterText = $"p{price.ProductId}.";
+                }
+                <MudTd colspan="5" Style="border-right:none;" />
+                <MudTd>
                     <MudStack Row>
-                        @if (newProduct) {
-                            <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                                <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="() => AddSameItem (context.ProductId, context.StoreId)" />
-                            </MudTooltip>
-                        }
+                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+                        </MudTooltip>
                         <MudSpacer />
-                        @if (context.PriceWithTax == null) {
-                            @("未記入")
-                        } else {
-                            var price = DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax;
-                            <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateString ()}")">
-                                @($"¥{price:#,0}")
-                            </MudTooltip>
-                        }
+                        <MudTooltip Text="この製品の価格を追加" Duration="1000">
+                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Filled.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
+                        </MudTooltip>
                     </MudStack>
+                </MudTd>
+            </GroupFooterTemplate>
+            <RowTemplate>
+                @{ var (category, product, store) = GetRelations (context); }
+                <MudHidden Breakpoint="Breakpoint.Xs">
+                    <MudTd colspan="2" />
+                </MudHidden>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
+                    @if (context.PriceWithTax == null) {
+                        @("未記入")
+                    } else {
+                        var price = DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax;
+                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateString ()}")">
+                            @($"¥{price:#,0}")
+                        </MudTooltip>
+                    }
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     <MudTooltip Text="@(context.UnitPrice == null ? "未記入" : $"¥{context.UnitPrice}")" Duration="1000">
@@ -92,20 +109,15 @@
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>
             <RowEditingTemplate>
-                @{ var (category, product, store, newCategory, newProduct, newStore) = GetRelations (context); }
-                <MudTd>
-                    @{ var disable = context.ReferenceCount (DataSet) > 0; }
-                    <MudTooltip Text="@(disable ? "最後につき削除不可" : "削除")" Duration="1000">
-                        <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
-                    </MudTooltip>
-                </MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(context.Category (DataSet)?.Name)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">
-                    <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.ProductId">
-                        @foreach (var product in DataSet.Products) {
-                            <MudSelectItem Value="product.Id">@(product.Name)</MudSelectItem>
-                        }
-                    </MudSelect>
+                @{ var (category, product, store) = GetRelations (context); }
+                <MudTd colspan="2">
+                    <MudStack Row>
+                        <MudSpacer />
+                        @{ var disable = context.ReferenceCount (DataSet) > 0; }
+                        <MudTooltip Text="@(disable ? "最後につき削除不可" : "この価格を削除")" Duration="1000">
+                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                        </MudTooltip>
+                    </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">
                     <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.StoreId">
@@ -115,14 +127,12 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
-                    <MudStack>
-                        @if (DataSet.TaxExcluded) {
-                            <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
-                        } else {
-                            <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
-                        }
-                        <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
-                    </MudStack>
+                    @if (DataSet.TaxExcluded) {
+                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
+                    } else {
+                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
+                    }
+                    <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
@@ -154,10 +164,38 @@
 @code{
     /// <summary>直上の行との比較用</summary>
     protected long lastCategoryId;
+
     /// <summary>直上の行との比較用</summary>
     protected long lastProductId;
+
     /// <summary>直上の行との比較用</summary>
     protected long lastStoreId;
+
+    /// <summary>ページの変化検出用</summary>
+    protected int lastPage;
+
+    /// <inheritdoc/>
+    protected override int _initialPageSizeIndex => 2;
+
+    /// <summary>ページの変化を検出</summary>
+    protected void CheckPageChangedAndCollapse () {
+        if (_table != null && lastPage != _table.CurrentPage) {
+            // グループをたたむ
+            _table.CollapseAllGroups ();
+            // 編集を終える
+            _table.SetEditingItem (null);
+            lastPage = _table.CurrentPage;
+        }
+    }
+
+    /// <summary>行グループ</summary>
+    protected TableGroupDefinition<Price> groupDefinition = new () {
+        GroupName = "Product",
+        Indentation = false,
+        Expandable = true,
+        IsInitiallyExpanded = false,
+        Selector = i => i.ProductId
+    };
 
     /// 同じ製品の価格を追加
     protected async Task AddSameItem (long productId, long storeId) {
@@ -173,17 +211,14 @@
     }
 
     /// <summary>行毎の関係値を取得</summary>
-    private (Category? category, Product? product, Store? Store, bool newCategory, bool newProduct, bool newStore) GetRelations (Price context) {
+    private (Category? category, Product? product, Store? Store) GetRelations (Price context) {
         var category = context.Category (DataSet);
         var product = context.Product (DataSet);
         var store = context.Store (DataSet);
-        var newCategory = category?.Id != lastCategoryId;
-        var newProduct = product?.Id != lastProductId;
-        var newStore = store?.Id != lastStoreId;
         lastCategoryId = category?.Id ?? 0;
         lastProductId = product?.Id ?? 0;
         lastStoreId = store?.Id ?? 0;
-        return (category, product, store, newCategory, newProduct, newStore);
+        return (category, product, store);
     }
 
     /// <summary>編集で単価が有効になったら確認日時を設定</summary>
