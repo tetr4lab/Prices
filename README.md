@@ -43,6 +43,9 @@ https://zenn.dev/tetr4lab/articles/ad947ade600764
   - 表示優先度
 
 ### テーブルスキーマ
+
+<details><summary>sql</summary>
+
 ```sql:MariaDB
 DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
@@ -74,7 +77,6 @@ CREATE TABLE `prices` (
   `modified` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `price` float DEFAULT NULL COMMENT '価格(税込)',
   `quantity` float DEFAULT NULL COMMENT '数量',
-  `unit_price` float GENERATED ALWAYS AS (if(`price` is null or `quantity` is null,NULL,`price` / `quantity`)) VIRTUAL COMMENT '単価(税込)',
   `tax_rate` float NOT NULL COMMENT '税率',
   `product_id` bigint(20) NOT NULL,
   `store_id` bigint(20) NOT NULL,
@@ -139,6 +141,8 @@ CREATE TRIGGER `version_check_before_update_on_stores` BEFORE UPDATE ON `stores`
 END ;;
 DELIMITER ;
 ```
+
+</details>
 
 ## 画面と機能
 - 共通: ナビゲーションバー

@@ -50,7 +50,6 @@ from
 
     [Column ("price")] public float? PriceWithTax { get; set; } = null;
     [Column ("quantity")] public float? Quantity { get; set; } = null;
-    [Column ("unit_price"), VirtualColumn] public float? UnitPrice { get; set; } = null;
     [Column ("tax_rate"), Required] public float TaxRate { get; set; } = 0;
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
@@ -65,6 +64,9 @@ from
 
     /// <summary>店舗</summary>
     public Store? Store (PricesDataSet set) => set.Stores.Find (i => i.Id == StoreId);
+
+    /// <summary>単価</summary>
+    public float? UnitPrice => PriceWithTax == null || Quantity == null ? null : PriceWithTax / Quantity;
 
     /// <summary>税率(%)</summary>
     public int TaxPercentage {
@@ -111,7 +113,6 @@ from
         var item = base.Clone ();
         item.PriceWithTax = PriceWithTax;
         item.Quantity = Quantity;
-        item.UnitPrice = UnitPrice;
         item.TaxRate = TaxRate;
         item.ProductId = ProductId;
         item.StoreId = StoreId;
@@ -123,7 +124,6 @@ from
     public override Price CopyTo (Price destination) {
         destination.PriceWithTax = PriceWithTax;
         destination.Quantity = Quantity;
-        destination.UnitPrice = UnitPrice;
         destination.TaxRate = TaxRate;
         destination.ProductId = ProductId;
         destination.StoreId = StoreId;
@@ -137,7 +137,6 @@ from
         && Id == other.Id
         && PriceWithTax == other.PriceWithTax
         && Quantity == other.Quantity
-        && UnitPrice == other.UnitPrice
         && TaxRate == other.TaxRate
         && ProductId == other.ProductId
         && StoreId == other.StoreId

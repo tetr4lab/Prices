@@ -233,8 +233,7 @@
     /// <summary>編集で単価が有効になったら確認日時を設定</summary>
     protected override void Commit (object obj) {
         var item = GetT (obj);
-        if (item.PriceWithTax != null && item.Quantity != null) {
-            item.UnitPrice = item.PriceWithTax / item.Quantity;
+        if (item.UnitPrice != null) {
             item.Confirmed = DateTime.Now;
         }
         base.Commit (obj);
