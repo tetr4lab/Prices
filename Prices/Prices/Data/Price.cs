@@ -29,17 +29,21 @@ public class Price : BaseModel<Price>, IBaseModel {
     };
 
     /// <inheritdoc/>
-    public static string BaseSelectSql {
-        get {
-            var table = PricesDataSet.GetSqlName<Price> ();
-            return $@"select {table}.*, CASE WHEN {table}.product_id <> LAG({table}.product_id) OVER (order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price) THEN 1 ELSE 0 END AS is_changed
-                from {table}
-                left join products on products.id = {table}.product_id
-                left join categories on categories.id = products.category_id
-                order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price is null, {table}.unit_price
-                ;";
-        }
-    }
+    public static string BaseSelectSql => @"
+select 
+    prices.*, 
+    CASE WHEN prices.product_id <> LAG(prices.product_id) OVER (
+      order by 
+        categories.priority desc, categories.name,
+        products.priority desc, products.name,
+        prices.price is null or prices.quantity is null,
+        prices.price / prices.quantity
+    ) THEN 1 ELSE 0 END AS is_changed
+from
+    prices
+    left join products on products.id = prices.product_id
+    left join categories on categories.id = products.category_id
+;";
 
     /// <inheritdoc/>
     public static string UniqueKeysSql => "";

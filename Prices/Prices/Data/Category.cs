@@ -28,12 +28,7 @@ public class Category : BaseModel<Category>, IBaseModel {
     };
 
     /// <inheritdoc/>
-    public static string BaseSelectSql {
-        get {
-            var table = PricesDataSet.GetSqlName<Category> ();
-            return $"select {table}.* from {table} order by priority desc, name;";
-        }
-    }
+    public static string BaseSelectSql => "select categories.* from categories order by priority desc, name;";
 
     [Column ("name"), StringLength (255), Required] public string Name { get; set; } = "";
     [Column ("is_food"), Required] public bool IsFood { get; set; } = false;

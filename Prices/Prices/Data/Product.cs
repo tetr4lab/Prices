@@ -22,12 +22,7 @@ public class Product : BaseModel<Product>, IBaseModel {
     };
 
     /// <inheritdoc/>
-    public static string BaseSelectSql {
-        get {
-            var table = PricesDataSet.GetSqlName<Product> ();
-            return $"select {table}.* from {table} order by priority desc, name;";
-        }
-    }
+    public static string BaseSelectSql => "select products.* from products order by priority desc, name;";
 
     /// <inheritdoc/>
     public static string UniqueKeysSql => "";
