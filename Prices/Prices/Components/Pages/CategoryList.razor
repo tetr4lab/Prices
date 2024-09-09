@@ -10,7 +10,7 @@
     <MudProgressCircular Indeterminate="true" />
 } else {
     if (items.Count > 0) {
-        <MudTable Items="items" Dense Hover Striped Bordered Breakpoint="Breakpoint.Xs" @ref="_table"
+        <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
                 Filter="new Func<Category, bool> (FilterFunc)"
                 SortLabel="⇅"
                 AllowUnsorted="true"
