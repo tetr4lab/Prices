@@ -160,9 +160,11 @@
     }
     <ItemListFooter TItem="Price" ShowAddButton="false">
         <MudSpacer />
-        <MudButton Variant="Variant.Filled" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
-            @($"税{(DataSet.TaxExcluded ? "込" : "抜")}")
-        </MudButton>
+        <MudStack Row Spacing="2" Class="align-center">
+            <MudText Typo="Typo.body2">税込</MudText>
+            <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
+            <MudText Typo="Typo.body2">税抜</MudText>
+        </MudStack>
         <MudSpacer />
     </ItemListFooter>
 }
