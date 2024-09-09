@@ -36,7 +36,7 @@ public class Price : BaseModel<Price>, IBaseModel {
                 from {table}
                 left join products on products.id = {table}.product_id
                 left join categories on categories.id = products.category_id
-                order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price
+                order by categories.priority desc, categories.name, products.priority desc, products.name, {table}.unit_price is null, {table}.unit_price
                 ;";
         }
     }
