@@ -1,18 +1,21 @@
 ﻿@typeparam TItem where TItem : BaseModel<TItem>, IBaseModel, new()
 
 <MudAppBar Class="backdrop-blur pb-2" Color="Color.Transparent" Dense Bottom="true" Fixed="true">
-    <MudSpacer />
-    <MudStack Row Class="align-end">
+    <MudStack Row Class="align-end" Style="width: 100%;">
         @ChildContent
+        @if (ShowAddButton) {
+            <MudTooltip Text="@($"{TItem.TableLabel}を追加")" Duration="1000">
+                <MudFab Disabled="DisableAdd" OnClick="OnAddItem" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Small" />
+            </MudTooltip>
+        }
     </MudStack>
-    <MudTooltip Text="@($"{TItem.TableLabel}を追加")" Duration="1000">
-        <MudFab Disabled="DisableAdd" OnClick="OnAddItem" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Small" />
-    </MudTooltip>
 </MudAppBar>
 
 @code {
     [Parameter, EditorRequired]
     public RenderFragment ChildContent { get; set; } = default!;
+    /// <summary>追加ボタンを表示</summary>
+    [Parameter] public bool ShowAddButton { get; set; } = true;
     /// <summary>追加ボタンが押せない条件</summary>
     [Parameter] public bool DisableAdd { get; set; }
     /// <summary>追加ボタンが押された</summary>

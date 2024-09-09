@@ -27,14 +27,7 @@
                 EditButtonPosition="TableEditButtonPosition.End"
                 EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
-                <MudTh Style="width: 8em;">
-                    <MudStack Row>
-                        <MudTooltip Text="全ての価格を一覧" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("s", "./"))" />
-                        </MudTooltip>
-                        <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Store, object>(x=>x.Priority ?? 0)"><MudIcon Icon="@Icons.Material.Filled.Sort" Size="Size.Small" /></MudTableSortLabel>
-                    </MudStack>
-                </MudTh>
+                <MudTh Style="width: 8em;"><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Store, object>(x=>x.Priority ?? 0)"><MudIcon Icon="@Icons.Material.Outlined.Sort" Size="Size.Small" /></MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Store, string?>(x=>x.Name)">@(Store.Label [nameof (Store.Name)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Store.Label[nameof (Store.Remarks)])</MudTh>
             </HeaderContent>
@@ -42,7 +35,7 @@
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Priority)])">
                     <MudStack Row>
                         <MudTooltip Text="価格を一覧" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"s{context.Id}."); NavManager.NavigateTo ("./"); })" />
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"s{context.Id}."); NavManager.NavigateTo ("./"); })" />
                         </MudTooltip>
                         <MudSpacer />
                         @context.Priority
@@ -56,7 +49,7 @@
                     @{var disable = context.ReferenceCount (DataSet) > 0;}
                     <MudStack Row Class="align-center">
                         <MudTooltip Text="@(disable ? "使用中につき削除不可" : "削除")" Duration="1000">
-                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
                         </MudTooltip>
                         <MudNumericField Typo="Typo.body2" T="int?" Min="0" Max="99" HideSpinButtons="true" @bind-value="context.Priority" />
                     </MudStack>
@@ -85,7 +78,11 @@
         <MudText>No items found.</MudText>
     }
     <ItemListFooter TItem="Store" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
-        <MudItem Style="width: 20em;">
+        <MudTooltip Text="全ての価格を一覧" Duration="1000">
+            <MudFab Size="Size.Small" StartIcon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("s", "./"))" />
+        </MudTooltip>
+        <MudSpacer />
+        <MudItem Style="width: 9em;">
             <MudTextField Typo="Typo.body2" T="string" Label="adding store name" @bind-Value="newItem.Name" />
         </MudItem>
     </ItemListFooter>

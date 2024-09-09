@@ -76,11 +76,11 @@
                 <MudTd>
                     <MudStack Row>
                         <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Filled.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
                         </MudTooltip>
                         <MudSpacer />
                         <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Filled.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
+                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
                         </MudTooltip>
                     </MudStack>
                 </MudTd>
@@ -115,7 +115,7 @@
                         <MudSpacer />
                         @{ var disable = context.ReferenceCount (DataSet) > 0; }
                         <MudTooltip Text="@(disable ? "最後につき削除不可" : "この価格を削除")" Duration="1000">
-                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
                         </MudTooltip>
                     </MudStack>
                 </MudTd>
@@ -128,11 +128,11 @@
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
                     @if (DataSet.TaxExcluded) {
-                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
+                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
                     } else {
-                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
+                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
                     }
-                    <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
+                    <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
@@ -158,6 +158,13 @@
     } else {
         <MudText>No items found.</MudText>
     }
+    <ItemListFooter TItem="Price" ShowAddButton="false">
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
+            @($"税{(DataSet.TaxExcluded ? "込" : "抜")}")
+        </MudButton>
+        <MudSpacer />
+    </ItemListFooter>
 }
 
 
