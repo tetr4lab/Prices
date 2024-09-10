@@ -1,48 +1,48 @@
 ---
-title: “ú—j•i‰¿Ši”äŠr
+title: æ—¥æ›œå“ä¾¡æ ¼æ¯”è¼ƒ
 tags: Blazor ASP.NET MudBlazor PetaPoco MySQL MariaDB
 ---
-# “ú—j•i‰¿Ši”äŠr
-## ‚Í‚¶‚ß‚É
-### –Ú“I
-“ú—p•i‚ð’²’B‚·‚éÛ‚ÌŽd“ü‚êæ‚Ì‘I’è‚É—p‚¢‚é‚½‚ßA”„‰¿‚ðŽûW‚µ‚Ä”äŠr‚Å‚«‚é‚æ‚¤‚É‚µ‚Ü‚·B
+# æ—¥æ›œå“ä¾¡æ ¼æ¯”è¼ƒ
+## ã¯ã˜ã‚ã«
+### ç›®çš„
+æ—¥ç”¨å“ã‚’èª¿é”ã™ã‚‹éš›ã®ä»•å…¥ã‚Œå…ˆã®é¸å®šã«ç”¨ã„ã‚‹ãŸã‚ã€å£²ä¾¡ã‚’åŽé›†ã—ã¦æ¯”è¼ƒã§ãã‚‹ã‚ˆã†ã«ã—ã¾ã™ã€‚
 
-### ŠÂ‹«
-#### ƒrƒ‹ƒh
+### ç’°å¢ƒ
+#### ãƒ“ãƒ«ãƒ‰
 - .NET 8.0
 - MudBlazor 7.8.0
 - PetaPoco 6.0.677
 - MySqlConnector 2.3.7
 
-#### ƒT[ƒo
+#### ã‚µãƒ¼ãƒ
 
 https://zenn.dev/tetr4lab/articles/ad947ade600764
 
-## ƒf[ƒ^\‘¢
-### ˜_—\¬
-- ƒJƒeƒSƒŠ
-  - –¼‘O
-  - H•i‚©‚Ç‚¤‚©
-  - Á”ïÅ—¦
-- »•i
-  - –¼‘O
-  - ƒJƒeƒSƒŠ: ŽQÆ
-  - ’PˆÊ
-  - •\Ž¦—Dæ“x
-- “X•Ü
-  - –¼‘O
-  - •\Ž¦—Dæ“x
-- ‰¿Ši
-  - ‰¿Ši(Åž)
-  - ”—Ê
-  - ’P‰¿: ‰¿Ši(Åž)/”—Ê
-  - Á”ïÅ—¦
-  - »•i: ŽQÆ
-  - “X•Ü: ŽQÆ
-  - Šm”F“úŽž
-  - •\Ž¦—Dæ“x
+## ãƒ‡ãƒ¼ã‚¿æ§‹é€ 
+### è«–ç†æ§‹æˆ
+- ã‚«ãƒ†ã‚´ãƒª
+  - åå‰
+  - é£Ÿå“ã‹ã©ã†ã‹
+  - æ¶ˆè²»ç¨ŽçŽ‡
+- è£½å“
+  - åå‰
+  - ã‚«ãƒ†ã‚´ãƒª: å‚ç…§
+  - å˜ä½
+  - è¡¨ç¤ºå„ªå…ˆåº¦
+- åº—èˆ—
+  - åå‰
+  - è¡¨ç¤ºå„ªå…ˆåº¦
+- ä¾¡æ ¼
+  - ä¾¡æ ¼(ç¨Žè¾¼)
+  - æ•°é‡
+  - å˜ä¾¡: ä¾¡æ ¼(ç¨Žè¾¼)/æ•°é‡
+  - æ¶ˆè²»ç¨ŽçŽ‡
+  - è£½å“: å‚ç…§
+  - åº—èˆ—: å‚ç…§
+  - ç¢ºèªæ—¥æ™‚
+  - è¡¨ç¤ºå„ªå…ˆåº¦
 
-### ƒe[ƒuƒ‹ƒXƒL[ƒ}
+### ãƒ†ãƒ¼ãƒ–ãƒ«ã‚¹ã‚­ãƒ¼ãƒž
 
 <details><summary>sql</summary>
 
@@ -60,7 +60,7 @@ CREATE TABLE `categories` (
   `priority` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='ƒJƒeƒSƒŠ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='ã‚«ãƒ†ã‚´ãƒª';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_categories` BEFORE UPDATE ON `categories` FOR EACH ROW begin
     if new.version <= old.version then
@@ -75,19 +75,19 @@ CREATE TABLE `prices` (
   `version` int(11) NOT NULL DEFAULT 0,
   `created` datetime NOT NULL DEFAULT current_timestamp(),
   `modified` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `price` float DEFAULT NULL COMMENT '‰¿Ši(Åž)',
-  `quantity` float DEFAULT NULL COMMENT '”—Ê',
-  `tax_rate` float NOT NULL COMMENT 'Å—¦',
+  `price` float DEFAULT NULL COMMENT 'ä¾¡æ ¼(ç¨Žè¾¼)',
+  `quantity` float DEFAULT NULL COMMENT 'æ•°é‡',
+  `tax_rate` float NOT NULL COMMENT 'ç¨ŽçŽ‡',
   `product_id` bigint(20) NOT NULL,
   `store_id` bigint(20) NOT NULL,
-  `confirmed` datetime DEFAULT NULL COMMENT 'Šm”F“úŽž',
+  `confirmed` datetime DEFAULT NULL COMMENT 'ç¢ºèªæ—¥æ™‚',
   `remarks` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_product_id_products_id` (`product_id`),
   KEY `fk_store_id_stores_id` (`store_id`),
   CONSTRAINT `fk_product_id_products_id` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `fk_store_id_stores_id` FOREIGN KEY (`store_id`) REFERENCES `stores` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='‰¿Ši';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='ä¾¡æ ¼';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_prices` BEFORE UPDATE ON `prices` FOR EACH ROW begin
     if new.version <= old.version then
@@ -111,7 +111,7 @@ CREATE TABLE `products` (
   UNIQUE KEY `name` (`name`),
   KEY `category_id` (`category_id`),
   CONSTRAINT `fk_category_id_categories_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='»•i';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='è£½å“';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_products` BEFORE UPDATE ON `products` FOR EACH ROW begin
     if new.version <= old.version then
@@ -131,7 +131,7 @@ CREATE TABLE `stores` (
   `priority` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='“X•Ü';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='åº—èˆ—';
 DELIMITER ;;
 CREATE TRIGGER `version_check_before_update_on_stores` BEFORE UPDATE ON `stores` FOR EACH ROW begin
     if new.version <= old.version then
@@ -144,84 +144,84 @@ DELIMITER ;
 
 </details>
 
-## ‰æ–Ê‚Æ‹@”\
-- ‹¤’Ê: ƒiƒrƒQ[ƒVƒ‡ƒ“ƒo[
-  - ƒƒjƒ…[: ƒ{ƒ^ƒ“•À‚Ñ
-    - ‰¿Ši(ƒz[ƒ€)A»•iAƒJƒeƒSƒŠA“X•Ü
-  - ŒŸõŒê: ƒtƒB[ƒ‹ƒh
-    - ŒŸõ: ƒ{ƒ^ƒ“
-    - iž‰ðœ: ƒ{ƒ^ƒ“
-  - ƒe[ƒ}: ƒ{ƒ^ƒ“
-    - ƒ‰ƒCƒg/ƒ_[ƒNƒ‚[ƒhØ‚è‘Ö‚¦
-- ‰¿Ši(ƒz[ƒ€): Ü‚è‚½‚½‚Ýˆê——EƒCƒ“ƒ‰ƒCƒ“•ÒW‰æ–Ê
-  - Å: ƒgƒOƒ‹
-    - ‰¿Ši‚ÌÅž/”²‚ðØ‚è‘Ö‚¦‚é
-  - ˆê——: Ü‚è‚½‚½‚Ý•\
-    - »•i: ƒOƒ‹[ƒv
-      - ƒJƒeƒSƒŠ: —ñ
-      - »•i: —ñ
-      - ‚±‚Ì»•i‚Åi‚èž‚Ý: ƒ{ƒ^ƒ“
-      - “¯‚¶»•i‚Ì‰¿Ši‚ð’Ç‰Á: ƒ{ƒ^ƒ“
-    - ‰¿Ši: s
-      - íœ: ƒ{ƒ^ƒ“
-        - Šm”F: ƒ_ƒCƒAƒƒO
-      - “X•Ü: —ñƒZƒŒƒNƒ^
-      - ‰¿Ši: —ñƒtƒB[ƒ‹ƒh
-        - Å—¦: ƒtƒB[ƒ‹ƒh
-      - ”—Ê: —ñƒtƒB[ƒ‹ƒh
-        - ’PˆÊ: —ñ
-      - ”õl: —ñƒtƒB[ƒ‹ƒh
-      - •ÒW: sƒ{ƒ^ƒ“
-        - Šm’è: ƒ{ƒ^ƒ“
-        - ”jŠü: ƒ{ƒ^ƒ“
-- ƒJƒeƒSƒŠ: ˆê——EƒCƒ“ƒ‰ƒCƒ“•ÒW‰æ–Ê
-  - ˆê——: •\
-    - »•iˆê——: sƒ{ƒ^ƒ“
-    - íœ: sƒ{ƒ^ƒ“
-      - Šm”F: ƒ_ƒCƒAƒƒO
-    - —Dæ“x: —ñƒtƒB[ƒ‹ƒh
-    - –¼‘O: —ñƒtƒB[ƒ‹ƒh
-    - H•i: —ñƒgƒOƒ‹
-    - Å—¦: —ñƒtƒB[ƒ‹ƒh
-      - H•iƒgƒOƒ‹‚É˜A“®‚µ‚ÄŽ©“®Ý’è‚³‚ê‚é‚ªA‘‚«Š·‚¦‰Â”\
-    - ”õl: —ñƒtƒB[ƒ‹ƒh
-    - •ÒW: sƒ{ƒ^ƒ“
-      - Šm’è: ƒ{ƒ^ƒ“
-      - ”jŠü: ƒ{ƒ^ƒ“
-  - ƒtƒbƒ^[
-    - ‘S‚Ä‚Ì»•i‚ðˆê——: ƒ{ƒ^ƒ“
-    - –¼‘O: ƒtƒB[ƒ‹ƒh
-    - ’Ç‰Á: ƒ{ƒ^ƒ“
-- »•i: ˆê——EƒCƒ“ƒ‰ƒCƒ“•ÒW‰æ–Ê
-  - ˆê——: •\
-    - ‰¿Šiˆê——: sƒ{ƒ^ƒ“
-    - íœ: sƒ{ƒ^ƒ“
-      - Šm”F: ƒ_ƒCƒAƒƒO
-    - —Dæ“x: —ñƒtƒB[ƒ‹ƒh
-    - –¼‘O: —ñƒtƒB[ƒ‹ƒh
-    - ƒJƒeƒSƒŠ: —ñƒZƒŒƒNƒ^
-    - ”õl: —ñƒtƒB[ƒ‹ƒh
-    - •ÒW: sƒ{ƒ^ƒ“
-      - Šm’è: ƒ{ƒ^ƒ“
-      - ”jŠü: ƒ{ƒ^ƒ“
-  - ƒtƒbƒ^[
-    - ‘S‚Ä‚Ì‰¿Ši‚ðˆê——: ƒ{ƒ^ƒ“
-    - ƒJƒeƒSƒŠ: —ñƒZƒŒƒNƒ^
-    - –¼‘O: ƒtƒB[ƒ‹ƒh
-    - ’Ç‰Á: ƒ{ƒ^ƒ“
-      - ¶¬‚µ‚½»•i‚Ì‰¿Ši‚à’Ç‰Á
-- “X•Ü: ˆê——EƒCƒ“ƒ‰ƒCƒ“•ÒW‰æ–Ê
-  - ˆê——: •\
-    - ‰¿Šiˆê——: sƒ{ƒ^ƒ“
-    - íœ: sƒ{ƒ^ƒ“
-      - Šm”F: ƒ_ƒCƒAƒƒO
-    - —Dæ“x: —ñƒtƒB[ƒ‹ƒh
-    - –¼‘O: —ñƒtƒB[ƒ‹ƒh
-    - ”õl: —ñƒtƒB[ƒ‹ƒh
-    - •ÒW: sƒ{ƒ^ƒ“
-      - Šm’è: ƒ{ƒ^ƒ“
-      - ”jŠü: ƒ{ƒ^ƒ“
-  - ƒtƒbƒ^[
-    - ‘S‚Ä‚Ì‰¿Ši‚ðˆê——: ƒ{ƒ^ƒ“
-    - –¼‘O: ƒtƒB[ƒ‹ƒh
-    - ’Ç‰Á: ƒ{ƒ^ƒ“
+## ç”»é¢ã¨æ©Ÿèƒ½
+- å…±é€š: ãƒŠãƒ“ã‚²ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ¼
+  - ãƒ¡ãƒ‹ãƒ¥ãƒ¼: ãƒœã‚¿ãƒ³ä¸¦ã³
+    - ä¾¡æ ¼(ãƒ›ãƒ¼ãƒ )ã€è£½å“ã€ã‚«ãƒ†ã‚´ãƒªã€åº—èˆ—
+  - æ¤œç´¢èªž: ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - æ¤œç´¢: ãƒœã‚¿ãƒ³
+    - çµžè¾¼è§£é™¤: ãƒœã‚¿ãƒ³
+  - ãƒ†ãƒ¼ãƒž: ãƒœã‚¿ãƒ³
+    - ãƒ©ã‚¤ãƒˆ/ãƒ€ãƒ¼ã‚¯ãƒ¢ãƒ¼ãƒ‰åˆ‡ã‚Šæ›¿ãˆ
+- ä¾¡æ ¼(ãƒ›ãƒ¼ãƒ ): æŠ˜ã‚ŠãŸãŸã¿ä¸€è¦§ãƒ»ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ç·¨é›†ç”»é¢
+  - ç¨Ž: ãƒˆã‚°ãƒ«
+    - ä¾¡æ ¼ã®ç¨Žè¾¼/æŠœã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
+  - ä¸€è¦§: æŠ˜ã‚ŠãŸãŸã¿è¡¨
+    - è£½å“: ã‚°ãƒ«ãƒ¼ãƒ—
+      - ã‚«ãƒ†ã‚´ãƒª: åˆ—
+      - è£½å“: åˆ—
+      - ã“ã®è£½å“ã§çµžã‚Šè¾¼ã¿: ãƒœã‚¿ãƒ³
+      - åŒã˜è£½å“ã®ä¾¡æ ¼ã‚’è¿½åŠ : ãƒœã‚¿ãƒ³
+    - ä¾¡æ ¼: è¡Œ
+      - å‰Šé™¤: ãƒœã‚¿ãƒ³
+        - ç¢ºèª: ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
+      - åº—èˆ—: åˆ—ã‚»ãƒ¬ã‚¯ã‚¿
+      - ä¾¡æ ¼: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+        - ç¨ŽçŽ‡: ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+      - æ•°é‡: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+        - å˜ä½: åˆ—
+      - å‚™è€ƒ: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+      - ç·¨é›†: è¡Œãƒœã‚¿ãƒ³
+        - ç¢ºå®š: ãƒœã‚¿ãƒ³
+        - ç ´æ£„: ãƒœã‚¿ãƒ³
+- ã‚«ãƒ†ã‚´ãƒª: ä¸€è¦§ãƒ»ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ç·¨é›†ç”»é¢
+  - ä¸€è¦§: è¡¨
+    - è£½å“ä¸€è¦§: è¡Œãƒœã‚¿ãƒ³
+    - å‰Šé™¤: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºèª: ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
+    - å„ªå…ˆåº¦: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - åå‰: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - é£Ÿå“: åˆ—ãƒˆã‚°ãƒ«
+    - ç¨ŽçŽ‡: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+      - é£Ÿå“ãƒˆã‚°ãƒ«ã«é€£å‹•ã—ã¦è‡ªå‹•è¨­å®šã•ã‚Œã‚‹ãŒã€æ›¸ãæ›ãˆå¯èƒ½
+    - å‚™è€ƒ: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - ç·¨é›†: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºå®š: ãƒœã‚¿ãƒ³
+      - ç ´æ£„: ãƒœã‚¿ãƒ³
+  - ãƒ•ãƒƒã‚¿ãƒ¼
+    - å…¨ã¦ã®è£½å“ã‚’ä¸€è¦§: ãƒœã‚¿ãƒ³
+    - åå‰: ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - è¿½åŠ : ãƒœã‚¿ãƒ³
+- è£½å“: ä¸€è¦§ãƒ»ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ç·¨é›†ç”»é¢
+  - ä¸€è¦§: è¡¨
+    - ä¾¡æ ¼ä¸€è¦§: è¡Œãƒœã‚¿ãƒ³
+    - å‰Šé™¤: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºèª: ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
+    - å„ªå…ˆåº¦: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - åå‰: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - ã‚«ãƒ†ã‚´ãƒª: åˆ—ã‚»ãƒ¬ã‚¯ã‚¿
+    - å‚™è€ƒ: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - ç·¨é›†: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºå®š: ãƒœã‚¿ãƒ³
+      - ç ´æ£„: ãƒœã‚¿ãƒ³
+  - ãƒ•ãƒƒã‚¿ãƒ¼
+    - å…¨ã¦ã®ä¾¡æ ¼ã‚’ä¸€è¦§: ãƒœã‚¿ãƒ³
+    - ã‚«ãƒ†ã‚´ãƒª: åˆ—ã‚»ãƒ¬ã‚¯ã‚¿
+    - åå‰: ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - è¿½åŠ : ãƒœã‚¿ãƒ³
+      - ç”Ÿæˆã—ãŸè£½å“ã®ä¾¡æ ¼ã‚‚è¿½åŠ 
+- åº—èˆ—: ä¸€è¦§ãƒ»ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ç·¨é›†ç”»é¢
+  - ä¸€è¦§: è¡¨
+    - ä¾¡æ ¼ä¸€è¦§: è¡Œãƒœã‚¿ãƒ³
+    - å‰Šé™¤: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºèª: ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
+    - å„ªå…ˆåº¦: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - åå‰: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - å‚™è€ƒ: åˆ—ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - ç·¨é›†: è¡Œãƒœã‚¿ãƒ³
+      - ç¢ºå®š: ãƒœã‚¿ãƒ³
+      - ç ´æ£„: ãƒœã‚¿ãƒ³
+  - ãƒ•ãƒƒã‚¿ãƒ¼
+    - å…¨ã¦ã®ä¾¡æ ¼ã‚’ä¸€è¦§: ãƒœã‚¿ãƒ³
+    - åå‰: ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
+    - è¿½åŠ : ãƒœã‚¿ãƒ³
