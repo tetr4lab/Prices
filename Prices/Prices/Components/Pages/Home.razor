@@ -1,4 +1,4 @@
-@inherits ItemListBase<Price>
+﻿@inherits ItemListBase<Price>
 
 @page "/"
 
@@ -21,7 +21,8 @@
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
                 FooterClass="mud-background-gray"
-                GroupBy="groupDefinition"
+                Striped="@(!AllowGrouping)"
+                GroupBy="@(AllowGrouping ? groupDefinition : null)"
                 GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
                 ReadOnly="false"
                 CanCancelEdit="true"
@@ -42,7 +43,9 @@
                 </MudTh>
                 <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.Quantity)])</MudTh>
                 <MudTh>@(Price.Label [nameof (Price.Remarks)])</MudTh>
-                @{ lastCategoryId = lastProductId = lastStoreId = 0; }
+                @if (!AllowGrouping) {
+                    lastCategoryId = lastProductId = lastStoreId = 0;
+                }
             </HeaderContent>
             <GroupHeaderTemplate>
                 @{
@@ -87,10 +90,23 @@
             </GroupFooterTemplate>
             <RowTemplate>
                 @{ var (category, product, store) = GetRelations (context); }
-                <MudHidden Breakpoint="Breakpoint.Xs">
-                    <MudTd colspan="2" />
-                </MudHidden>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                @if (AllowGrouping) {
+                    <MudHidden Breakpoint="Breakpoint.Xs">
+                        <MudTd colspan="2" />
+                    </MudHidden>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                } else {
+                    var newCategory = lastCategoryId != category?.Id;
+                    var newProduct = lastProductId != product?.Id;
+                    var newStore = lastStoreId != store?.Id;
+                    System.Diagnostics.Debug.WriteLine ($"{category?.Id}, {product?.Id}, {store?.Id} {lastCategoryId}, {lastProductId}, {lastStoreId} {newCategory}, {newProduct}, {newStore}");
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
+                    lastCategoryId = category?.Id ?? 0;
+                    lastProductId = product?.Id ?? 0;
+                    lastStoreId = store?.Id ?? 0;
+                }
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
                     @if (context.PriceWithTax == null) {
                         @("未記入")
@@ -144,10 +160,14 @@
             </RowEditingTemplate>
             <FooterContent>
                 <MudTd colspan="6">
-                    <MudStack Row Spacing="2" Class="align-center justify-center">
-                        <MudText Typo="Typo.body2">税込</MudText>
-                        <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
-                        <MudText Typo="Typo.body2">税抜</MudText>
+                    <MudStack Row Class="align-center justify-center">
+                        <MudCheckBox Size="Size.Small" @bind-Value="AllowGrouping"><MudText Typo="Typo.body2" Class="mr-3" Style="margin-left: -8px;">グループ</MudText></MudCheckBox>
+                        <MudDivider Vertical="true" FlexItem="true" />
+                        <MudStack Row Spacing="2" Class="align-center">
+                            <MudText Typo="Typo.body2">税込</MudText>
+                            <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
+                            <MudText Typo="Typo.body2">税抜</MudText>
+                        </MudStack>
                     </MudStack>
                 </MudTd>
             </FooterContent>
@@ -184,7 +204,7 @@
     protected int lastPage;
 
     /// <inheritdoc/>
-    protected override int _initialPageSizeIndex => 2;
+    protected override int _initialPageSizeIndex => AllowGrouping ? 2 : 1;
 
     /// <summary>ページの変化を検出</summary>
     protected void CheckPageChangedAndCollapse () {
@@ -196,6 +216,17 @@
             lastPage = _table.CurrentPage;
         }
     }
+
+    /// <summary>グループ表示</summary>
+    protected bool AllowGrouping {
+        get => _allowGrouping;
+        set {
+            _allowGrouping = value;
+            _table?.SetRowsPerPage (_pageSizeOptions[_initialPageSizeIndex]);
+            StateHasChanged();
+        }
+    }
+    private bool _allowGrouping = true;
 
     /// <summary>行グループ</summary>
     protected TableGroupDefinition<Price> groupDefinition = new () {
@@ -224,9 +255,6 @@
         var category = context.Category (DataSet);
         var product = context.Product (DataSet);
         var store = context.Store (DataSet);
-        lastCategoryId = category?.Id ?? 0;
-        lastProductId = product?.Id ?? 0;
-        lastStoreId = store?.Id ?? 0;
         return (category, product, store);
     }
 
