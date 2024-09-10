@@ -1,8 +1,8 @@
----
-title: 日曜品価格比較
+﻿---
+title: 日用品価格比較
 tags: Blazor ASP.NET MudBlazor PetaPoco MySQL MariaDB
 ---
-# 日曜品価格比較
+# 日用品価格比較
 ## はじめに
 ### 目的
 日用品を調達する際の仕入れ先の選定に用いるため、売価を収集して比較できるようにします。
