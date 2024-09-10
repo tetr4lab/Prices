@@ -1,4 +1,4 @@
-﻿@inherits ItemListBase<Price>
+@inherits ItemListBase<Price>
 
 @page "/"
 
@@ -20,6 +20,7 @@
                 RowEditPreview="Edit"
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
+                FooterClass="mud-background-gray"
                 GroupBy="groupDefinition"
                 GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
                 ReadOnly="false"
@@ -68,21 +69,20 @@
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@(price.Remarks)</MudTd>
             </GroupHeaderTemplate>
             <GroupFooterTemplate>
-                @{
+                @{  // 価格の新規追加で事前入力を行わないのは、ここがグループフッターで表中に複数回出現するため (`newItem`はひとつしかない)
                     var price = context.Items.First ();
                     var filterText = $"p{price.ProductId}.";
                 }
-                <MudTd colspan="5" Style="border-right:none;" />
+                <MudTd colspan="5" />
+                <MudTd Class="align-right">
+                    <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                        <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+                    </MudTooltip>
+                </MudTd>
                 <MudTd>
-                    <MudStack Row>
-                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
-                        </MudTooltip>
-                        <MudSpacer />
-                        <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
-                        </MudTooltip>
-                    </MudStack>
+                    <MudTooltip Text="この製品の価格を追加" Duration="1000">
+                        <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
+                    </MudTooltip>
                 </MudTd>
             </GroupFooterTemplate>
             <RowTemplate>
@@ -128,20 +128,29 @@
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
                     @if (DataSet.TaxExcluded) {
-                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
+                        <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
                     } else {
-                        <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
+                        <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
                     }
                     <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
-                    <MudTextField Typo="Typo.body2" T="float?" Adornment="Adornment.End" AdornmentText="@(product?.Unit)" Validation="@(new Func<float?, IEnumerable<string>>(QuantityValidation))" @bind-Value="context.Quantity" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.End" AdornmentText="@(product?.Unit)" Validation="@(new Func<float?, IEnumerable<string>>(QuantityValidation))" @bind-Value="context.Quantity" />
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Price.Label[nameof(Price.Remarks)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowEditingTemplate>
+            <FooterContent>
+                <MudTd colspan="6">
+                    <MudStack Row Spacing="2" Class="align-center justify-center">
+                        <MudText Typo="Typo.body2">税込</MudText>
+                        <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
+                        <MudText Typo="Typo.body2">税抜</MudText>
+                    </MudStack>
+                </MudTd>
+            </FooterContent>
             <PagerContent>
                 <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
             </PagerContent>
@@ -158,15 +167,6 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <ItemListFooter TItem="Price" ShowAddButton="false">
-        <MudSpacer />
-        <MudStack Row Spacing="2" Class="align-center">
-            <MudText Typo="Typo.body2">税込</MudText>
-            <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
-            <MudText Typo="Typo.body2">税抜</MudText>
-        </MudStack>
-        <MudSpacer />
-    </ItemListFooter>
 }
 
 

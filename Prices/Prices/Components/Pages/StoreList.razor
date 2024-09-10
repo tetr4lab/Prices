@@ -1,4 +1,4 @@
-﻿@inherits ItemListBase<Store>
+@inherits ItemListBase<Store>
 
 @page "/stores"
 
@@ -20,6 +20,7 @@
                 RowEditPreview="Edit"
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
+                FooterClass="mud-background-gray"
                 ReadOnly="false"
                 CanCancelEdit="true"
                 IsEditRowSwitchingBlocked="true"
@@ -55,12 +56,30 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Store.Label[nameof(Store.Name)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Store.Label[nameof(Store.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Store.Label[nameof(Store.Remarks)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowEditingTemplate>
+            <FooterContent>
+                <MudTd>
+                    <MudTooltip Text="全ての価格を一覧" Duration="1000">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", "./"))" />
+                    </MudTooltip>
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Name" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
+                </MudTd>
+                <MudTd>
+                    <MudTooltip Text="@($"{Store.TableLabel}を追加")" Duration="1000">
+                        <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
+                    </MudTooltip>
+                </MudTd>
+            </FooterContent>
             <PagerContent>
                 <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
             </PagerContent>
@@ -77,13 +96,4 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <ItemListFooter TItem="Store" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
-        <MudTooltip Text="全ての価格を一覧" Duration="1000">
-            <MudFab Size="Size.Small" StartIcon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("s", "./"))" />
-        </MudTooltip>
-        <MudSpacer />
-        <MudItem Style="width: 9em;">
-            <MudTextField Typo="Typo.body2" T="string" Label="adding store name" @bind-Value="newItem.Name" />
-        </MudItem>
-    </ItemListFooter>
 }

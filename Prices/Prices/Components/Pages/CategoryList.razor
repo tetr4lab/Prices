@@ -1,4 +1,4 @@
-﻿@inherits ItemListBase<Category>
+@inherits ItemListBase<Category>
 
 @page "/categories"
 
@@ -20,6 +20,7 @@
                 RowEditPreview="Edit"
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
+                FooterClass="mud-background-gray"
                 ReadOnly="false"
                 CanCancelEdit="true"
                 IsEditRowSwitchingBlocked="true"
@@ -59,18 +60,43 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Category.Label[nameof(Category.Name)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.IsFood)])">
-                    <MudCheckBox T="bool" @bind-Value:get="context.IsFood" @bind-Value:set="@(sw => OnChangeIsFoodAsync (sw, context))" />
+                    <MudCheckBox T="bool" @bind-Value:get="context.IsFood" @bind-Value:set="@(async sw => await OnChangeIsFoodAsync (sw, context))" />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.TaxRate)])">
                     <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
                 </MudTd>
                 <MudTd DataLabel="@(Category.Label[nameof(Category.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Category.Label[nameof(Category.Remarks)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowEditingTemplate>
+            <FooterContent>
+                <MudTd>
+                    <MudTooltip Text="全ての製品を一覧" Duration="1000">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.ShoppingBasket" Class="pa-0" OnClick="@(() => FilterAndNavigate ("c", "products"))" />
+                    </MudTooltip>
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Name" />
+                </MudTd>
+                <MudTd DataLabel="@(Category.Label[nameof(Category.IsFood)])">
+                    <MudCheckBox T="bool" @bind-Value:get="newItem.IsFood" @bind-Value:set="@(sw => {
+                        newItem.IsFood = sw;
+                        newItem.TaxRate = sw ? Category.TaxRateForFood : Category.TaxRateForNonFood;
+                    })" />
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.TaxRate)])">@(newItem.TaxPercentage)%</MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
+                </MudTd>
+                <MudTd>
+                    <MudTooltip Text="@($"{Category.TableLabel}を追加")" Duration="1000">
+                        <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
+                    </MudTooltip>
+                </MudTd>
+            </FooterContent>
             <PagerContent>
                 <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
             </PagerContent>
@@ -87,15 +113,6 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <ItemListFooter TItem="Category" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
-        <MudTooltip Text="全ての製品を一覧" Duration="1000">
-            <MudFab Size="Size.Small" StartIcon="@Icons.Material.Outlined.ShoppingBasket" Class="pa-0" OnClick="@(() => FilterAndNavigate ("c", "products"))" />
-        </MudTooltip>
-        <MudSpacer />
-        <MudItem Style="width: 9em;">
-            <MudTextField Typo="Typo.body2" T="string" Label="adding category name" @bind-Value="newItem.Name" />
-        </MudItem>
-    </ItemListFooter>
 }
 
 @code{

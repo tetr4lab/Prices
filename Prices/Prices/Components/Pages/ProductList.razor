@@ -1,4 +1,4 @@
-﻿@inherits ItemListBase<Product>
+@inherits ItemListBase<Product>
 
 @page "/products"
 
@@ -20,6 +20,7 @@
                 RowEditPreview="Edit"
                 RowEditCancel="Cancel"
                 RowEditCommit="Commit"
+                FooterClass="mud-background-gray"
                 ReadOnly="false"
                 CanCancelEdit="true"
                 IsEditRowSwitchingBlocked="true"
@@ -66,15 +67,43 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Name" Required Placeholder="@(Product.Label[nameof(Product.Name)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Unit" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Unit" />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Remarks)])">
-                    <MudTextField Typo="Typo.body2" T="string" @bind-Value="context.Remarks" Placeholder="@(Product.Label[nameof(Product.Remarks)])" />
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowEditingTemplate>
+            <FooterContent>
+                <MudTd>
+                    <MudTooltip Text="全ての価格を一覧" Duration="1000">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", "./"))" />
+                    </MudTooltip>
+                </MudTd>
+                <MudTd>
+                    <MudSelect Class="align-left" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="newItem.CategoryId">
+                        @foreach (var category in DataSet.Categories) {
+                            <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Name" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Unit" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
+                </MudTd>
+                <MudTd>
+                    <MudTooltip Text="@($"{Product.TableLabel}を追加")" Duration="1000">
+                        <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
+                    </MudTooltip>
+                </MudTd>
+            </FooterContent>
             <PagerContent>
                 <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
             </PagerContent>
@@ -91,22 +120,6 @@
     } else {
         <MudText>No items found.</MudText>
     }
-    <ItemListFooter TItem="Product" DisableAdd="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnAddItem="AddItem">
-        <MudTooltip Text="全ての価格を一覧" Duration="1000">
-            <MudFab Size="Size.Small" StartIcon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", "./"))" />
-        </MudTooltip>
-        <MudSpacer />
-        <MudItem Style="width: 9em;">
-            <MudSelect Class="align-left" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="newItem.CategoryId">
-                @foreach (var category in DataSet.Categories) {
-                    <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-        <MudItem Style="width: 9em;">
-            <MudTextField Class="mr-3" Typo="Typo.body2" T="string" Label="adding product name" @bind-Value="newItem.Name" />
-        </MudItem>
-    </ItemListFooter>
 }
 
 @code {
