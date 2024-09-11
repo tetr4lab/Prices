@@ -6,6 +6,7 @@ using MudBlazor;
 using System.Xml.Linq;
 using Prices.Components.Pages;
 using System.Data;
+using Tetr4lab;
 
 namespace Prices.Data;
 
@@ -90,7 +91,7 @@ from
         $"¥{PriceWithoutTax:#,0}.",
         $"x{Quantity:#,0}.",
         $"{TaxPercentage}%",
-        Confirmed?.ToShortDateString (),
+        Confirmed?.ToShortDateWithDayOfWeekString (),
         $"p{ProductId}.", 
         $"s{StoreId}.", 
         Lowest == 1 ? "!!" : "",

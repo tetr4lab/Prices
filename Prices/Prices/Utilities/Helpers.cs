@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.Globalization;
 using System.Net;
 using static Prices.Services.PricesDataSet;
 
@@ -8,6 +9,11 @@ public static class Helpers {
 }
 
 public static class StringHelper {
+    /// <summary>曜日付きの短い日付表記に変換する</summary>
+    public static string ToShortDateWithDayOfWeekString (this DateTime dateTime) {
+        return $"{dateTime.ToShortDateString ()} {dateTime.ToString ("ddd", CultureInfo.GetCultureInfo ("ja-JP"))}";
+    }
+
     /// <summary>文字列を指定幅に丸める</summary>
     public static string Ellipsis (this string str, int width, string mark = "…") => str.Length <= width ? str : $"{str [0..(width - mark.Length)]}{mark}";
 

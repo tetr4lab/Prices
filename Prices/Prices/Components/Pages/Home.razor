@@ -59,7 +59,7 @@
                     @if (price.PriceWithTax == null) {
                         @("未記入")
                     } else {
-                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {price.Confirmed?.ToShortDateString ()}")">
+                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {price.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認"}")">
                             @($"¥{(DataSet.TaxExcluded ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
                         </MudTooltip>
                     }
@@ -92,7 +92,12 @@
                 @{ var (category, product, store) = GetRelations (context); }
                 @if (AllowGrouping) {
                     <MudHidden Breakpoint="Breakpoint.Xs">
-                        <MudTd colspan="2" />
+                        <MudTd />
+                        <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
+                            <MudText Typo="Typo.body2" Style="color:var(--mud-palette-action-default);">
+                            @(context.Confirmed?.ToShortDateWithDayOfWeekString ())
+                            </MudText>
+                        </MudTd>
                     </MudHidden>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
                 } else {
@@ -112,7 +117,7 @@
                         @("未記入")
                     } else {
                         var price = DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax;
-                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateString ()}")">
+                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認"}")">
                             @($"¥{price:#,0}")
                         </MudTooltip>
                     }
@@ -126,7 +131,7 @@
             </RowTemplate>
             <RowEditingTemplate>
                 @{ var (category, product, store) = GetRelations (context); }
-                <MudTd colspan="2">
+                <MudTd>
                     <MudStack Row>
                         <MudSpacer />
                         @{ var disable = context.ReferenceCount (DataSet) > 0; }
@@ -134,6 +139,9 @@
                             <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
                         </MudTooltip>
                     </MudStack>
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
+                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Margin="0" Clearable @bind-Date="context.Confirmed" />
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">
                     <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.StoreId">
@@ -261,8 +269,10 @@
     /// <summary>編集で単価が有効になったら確認日時を設定</summary>
     protected override void Commit (object obj) {
         var item = GetT (obj);
-        if (item.UnitPrice != null) {
+        if (item.UnitPrice != null && item.Confirmed == null) {
             item.Confirmed = DateTime.Now;
+        } else if (item.UnitPrice == null && item.Confirmed != null) {
+            item.Confirmed = null;
         }
         base.Commit (obj);
     }

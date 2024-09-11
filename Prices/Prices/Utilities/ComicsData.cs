@@ -29,7 +29,7 @@ public class Comic {
         if (cols.Length > 5 && int.TryParse (cols [5], out var price)) { Price = price; }
         if (cols.Length > 6 && int.TryParse (cols [6], out var id)) { Id = id; }
     }
-    public override string ToString () => $"{PublishDate.ToShortDateString ()} '{Title}' by {string.Join ("/", Authors)} // {Publisher} ({Series}) ¥{Price:#,0} :{Id}";
+    public override string ToString () => $"{PublishDate.ToShortDateWithDayOfWeekString ()} '{Title}' by {string.Join ("/", Authors)} // {Publisher} ({Series}) ¥{Price:#,0} :{Id}";
 }
 
 /// <summary>コミックデータ</summary>
