@@ -26,7 +26,7 @@ public abstract class BaseModel<T> : IEquatable<T> where T : BaseModel<T>, new()
     /// <summary>生成日時</summary>
     [Column ("created"), VirtualColumn] public DateTime Created { get; set; }
     /// <summary>更新日時</summary>
-    [Column ("modefied"), VirtualColumn] public DateTime Modefied { get; set; }
+    [Column ("modified"), VirtualColumn] public DateTime Modified { get; set; }
     /// <summary>備考</summary>
     [Column ("remarks")] public string? Remarks { get; set; }
 
@@ -47,7 +47,7 @@ public abstract class BaseModel<T> : IEquatable<T> where T : BaseModel<T>, new()
             Id = Id,
             Version = Version,
             Created = Created,
-            Modefied = Modefied,
+            Modified = Modified,
             Remarks = Remarks,
         };
 
@@ -56,7 +56,7 @@ public abstract class BaseModel<T> : IEquatable<T> where T : BaseModel<T>, new()
         destination.Id = Id;
         destination.Version = Version;
         destination.Created = Created;
-        destination.Modefied = Modefied;
+        destination.Modified = Modified;
         destination.Remarks = Remarks;
         return destination;
     }

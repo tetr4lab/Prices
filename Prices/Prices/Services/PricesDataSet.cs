@@ -270,7 +270,7 @@ public sealed class PricesDataSet {
 
     /// <summary>必須項目のチェック</summary>
     public static bool EntityIsValid<T> (T? item, bool withId = false) where T : BaseModel<T>, new () {
-        if (item == null || withId && (item.Id <= 0 || item.Modefied == default)) { return false; }
+        if (item == null || withId && (item.Id <= 0 || item.Modified == default)) { return false; }
         var properties = new List<PropertyInfo> ();
         foreach (var property in typeof (T).GetProperties (BindingFlags.Instance | BindingFlags.Public) ?? []) {
             var required = property.GetCustomAttribute<RequiredAttribute> ();

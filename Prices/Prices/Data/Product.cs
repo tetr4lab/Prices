@@ -14,6 +14,8 @@ public class Product : BaseModel<Product>, IBaseModel {
     /// <inheritdoc/>
     public static Dictionary<string, string> Label { get; } = new Dictionary<string, string> {
         { nameof (Id), "ID" },
+        { nameof (Created), "生成日時" },
+        { nameof (Modified), "更新日時" },
         { nameof (Name), "製品名" },
         { nameof (CategoryId), "カテゴリ" },
         { nameof (Unit), "単位" },

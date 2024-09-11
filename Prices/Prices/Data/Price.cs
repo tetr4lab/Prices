@@ -18,6 +18,8 @@ public class Price : BaseModel<Price>, IBaseModel {
     /// <inheritdoc/>
     public static Dictionary<string, string> Label { get; } = new Dictionary<string, string> {
         { nameof (Id), "ID" },
+        { nameof (Created), "生成日時" },
+        { nameof (Modified), "更新日時" },
         { nameof (PriceWithTax), "価格" },
         { nameof (Quantity), "数量" },
         { nameof (UnitPrice), "単価" },

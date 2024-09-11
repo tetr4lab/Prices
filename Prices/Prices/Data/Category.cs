@@ -20,6 +20,8 @@ public class Category : BaseModel<Category>, IBaseModel {
     /// <inheritdoc/>
     public static Dictionary<string, string> Label { get; } = new Dictionary<string, string> {
         { nameof (Id), "ID" },
+        { nameof (Created), "生成日時" },
+        { nameof (Modified), "更新日時" },
         { nameof (Name), "カテゴリ名" },
         { nameof (IsFood), "食品" },
         { nameof (TaxRate), "税率"},

@@ -56,18 +56,10 @@
                 <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
-                    @if (price.PriceWithTax == null) {
-                        @("未記入")
-                    } else {
-                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {price.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認"}")">
-                            @($"¥{(DataSet.TaxExcluded ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
-                        </MudTooltip>
-                    }
+                    @(price.PriceWithTax == null ? "未記入" : $"¥{(DataSet.TaxExcluded ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
-                    <MudTooltip Text="@(price.UnitPrice == null ? "未記入" : $"¥{price.UnitPrice}")" Duration="1000">
-                        @(price.Quantity == null ? "未記入" : $"{price.Quantity:#,0}{product?.Unit}")
-                    </MudTooltip>
+                    @(price.Quantity == null ? "未記入" : $"{price.Quantity:#,0}{product?.Unit}")
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@(price.Remarks)</MudTd>
             </GroupHeaderTemplate>
@@ -94,9 +86,17 @@
                     <MudHidden Breakpoint="Breakpoint.Xs">
                         <MudTd />
                         <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
-                            <MudText Typo="Typo.body2" Style="color:var(--mud-palette-action-default);">
-                            @(context.Confirmed?.ToShortDateWithDayOfWeekString ())
-                            </MudText>
+                            <MudTooltip>
+                                <ChildContent>
+                                    <MudText Typo="Typo.body2" Style="font-size:var(--mud-typography-caption-size); color:var(--mud-palette-action-default);">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
+                                </ChildContent>
+                                <TooltipContent>
+                                    <MudText Typo="Typo.inherit" Align="Align.Left">
+                                        <p>@(Price.Label [nameof (Price.Modified)]): @(context.Modified.ToString ())</p>
+                                        <p>@(Price.Label [nameof (Price.Created)]): @(context.Created.ToString ())</p>
+                                    </MudText>
+                                </TooltipContent>
+                            </MudTooltip>
                         </MudTd>
                     </MudHidden>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
@@ -104,7 +104,6 @@
                     var newCategory = lastCategoryId != category?.Id;
                     var newProduct = lastProductId != product?.Id;
                     var newStore = lastStoreId != store?.Id;
-                    System.Diagnostics.Debug.WriteLine ($"{category?.Id}, {product?.Id}, {store?.Id} {lastCategoryId}, {lastProductId}, {lastStoreId} {newCategory}, {newProduct}, {newStore}");
                     <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
                     <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
@@ -113,17 +112,10 @@
                     lastStoreId = store?.Id ?? 0;
                 }
                 <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
-                    @if (context.PriceWithTax == null) {
-                        @("未記入")
-                    } else {
-                        var price = DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax;
-                        <MudTooltip Text="@($"{Price.Label[nameof(Price.Confirmed)]}: {context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認"}")">
-                            @($"¥{price:#,0}")
-                        </MudTooltip>
-                    }
+                    @(context.PriceWithTax == null ? "未記入" : $"¥{(DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax):#,0}")
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
-                    <MudTooltip Text="@(context.UnitPrice == null ? "未記入" : $"¥{context.UnitPrice}")" Duration="1000">
+                    <MudTooltip Text="@(context.UnitPrice == null ? "未記入" : $"@{context.UnitPrice}")" Duration="1000">
                         @(context.Quantity == null ? "未記入" : $"{context.Quantity:#,0}{product?.Unit}")
                     </MudTooltip>
                 </MudTd>
@@ -141,7 +133,7 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
-                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Margin="0" Clearable @bind-Date="context.Confirmed" />
+                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Margin="0" @bind-Date="context.Confirmed" />
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">
                     <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.StoreId">
