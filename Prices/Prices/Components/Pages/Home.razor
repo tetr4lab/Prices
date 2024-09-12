@@ -172,7 +172,9 @@
                 </MudTd>
             </FooterContent>
             <PagerContent>
-                <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+                @if (AllowPaging) {
+                    <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+                }
             </PagerContent>
             <EditButtonContent Context="button">
                 <MudTooltip Text="編集" Duration="1000">
@@ -204,7 +206,7 @@
     protected int lastPage;
 
     /// <inheritdoc/>
-    protected override int _initialPageSizeIndex => AllowGrouping ? 2 : 1;
+    protected override int _initialPageSizeIndex => AllowGrouping ? 6 : 1;
 
     /// <summary>ページの変化を検出</summary>
     protected void CheckPageChangedAndCollapse () {
@@ -222,7 +224,7 @@
         get => _allowGrouping;
         set {
             _allowGrouping = value;
-            _table?.SetRowsPerPage (_pageSizeOptions[_initialPageSizeIndex]);
+            InitRowsPerPage ();
             StateHasChanged();
         }
     }

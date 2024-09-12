@@ -10,8 +10,11 @@ namespace Prices.Components.Pages;
 
 public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>, IBaseModel, new() {
 
+    /// <summary>ページング機能の有効性</summary>
+    protected const bool AllowPaging = true;
+
     /// <summary>列挙する最大数</summary>
-    protected const int MaxListingNumber = 500;
+    protected const int MaxListingNumber = int.MaxValue;
 
     [Inject] protected NavigationManager NavManager { get; set; } = null!;
     [Inject] protected PricesDataSet DataSet { get; set; } = null!;
@@ -75,17 +78,24 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     protected override Task OnAfterRenderAsync (bool firstRender) {
         if (_table != null && !_inited) {
             _inited = true;
-            _table.SetRowsPerPage (_pageSizeOptions [_initialPageSizeIndex]);
+            InitRowsPerPage ();
         }
         return base.OnAfterRenderAsync (firstRender);
     }
     protected bool _inited;
 
+    /// <summary>ページ辺りの行数を初期化</summary>
+    protected void InitRowsPerPage () {
+        if (_table != null) {
+            _table.SetRowsPerPage (AllowPaging ? _pageSizeOptions [_initialPageSizeIndex] : int.MaxValue);
+        }
+    }
+
     /// <summary>テーブル</summary>
     protected MudTable<T>? _table;
 
     /// <summary>初期項目数のインデックス</summary>
-    protected virtual int _initialPageSizeIndex => 1;
+    protected virtual int _initialPageSizeIndex => 6;
 
     /// <summary>項目数の選択肢</summary>
     protected virtual int [] _pageSizeOptions { get; } = { 10, 20, 30, 50, 100, 200, MaxListingNumber, };

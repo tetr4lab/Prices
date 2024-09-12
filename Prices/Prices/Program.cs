@@ -1,4 +1,4 @@
-using System.Security.Claims;
+ï»¿using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using MudBlazor;
@@ -29,7 +29,7 @@ builder.Services.AddMudServices (config => {
     config.SnackbarConfiguration.MaximumOpacity = 80;
 });
 
-// ƒNƒbƒL[‚ÆƒO[ƒOƒ‹‚Ì”FØ‚ð\¬
+// ã‚¯ãƒƒã‚­ãƒ¼ã¨ã‚°ãƒ¼ã‚°ãƒ«ã®èªè¨¼ã‚’æ§‹æˆ
 builder.Services.AddAuthentication (options => {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
@@ -40,15 +40,15 @@ builder.Services.AddAuthentication (options => {
         options.ClientSecret = builder.Configuration ["Authentication:Google:ClientSecret"]!;
     });
 
-// ƒ[ƒ‹ƒAƒhƒŒƒX‚ð•ÛŽ‚·‚éƒNƒŒ[ƒ€‚ð—v‹‚·‚é”F‰Â—p‚Ìƒ|ƒŠƒV[‚ð\¬
+// ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ä¿æŒã™ã‚‹ã‚¯ãƒ¬ãƒ¼ãƒ ã‚’è¦æ±‚ã™ã‚‹èªå¯ç”¨ã®ãƒãƒªã‚·ãƒ¼ã‚’æ§‹æˆ
 builder.Services.AddAuthorization (options => {
-    // ŠÇ—ŽÒ
+    // ç®¡ç†è€…
     options.AddPolicy ("Admin", policyBuilder => {
         policyBuilder.RequireClaim (ClaimTypes.Email,
             builder.Configuration ["Identity:Claims:EmailAddress:Admin:0"]!
         );
     });
-    // ˆê”Êƒ†[ƒU (ŠÇ—ŽÒ‚ðŠÜ‚Þ)
+    // ä¸€èˆ¬ãƒ¦ãƒ¼ã‚¶ (ç®¡ç†è€…ã‚’å«ã‚€)
     options.AddPolicy ("Users", policyBuilder => {
         policyBuilder.RequireClaim (ClaimTypes.Email,
             builder.Configuration ["Identity:Claims:EmailAddress:Admin:0"]!,
