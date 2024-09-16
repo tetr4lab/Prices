@@ -39,20 +39,25 @@ public class Price : BaseModel<Price>, IBaseModel {
     /// </remarks>
     public static string BaseSelectSql => @"
 select 
-    prices.*, 
+    prices.*,
     case when prices.product_id <> lag(prices.product_id) over (
-      order by 
+      order BY 
         categories.priority desc, categories.name,
         products.priority desc, products.name,
-        prices.confirmed is null,
-        case when datediff(now(), prices.confirmed) > 365 then 1 else 0 end,
-        prices.price is null or prices.quantity is null,
+        prices.`no_confirm`,
+        prices.`too_old_confirm`,
+        prices.price is null or prices.quantity is NULL,
         prices.price / prices.quantity
-    ) then 1 else 0 end as is_changed
-from
-    prices
-    left join products on products.id = prices.product_id
-    left join categories on categories.id = products.category_id
+    ) then TRUE else FALSE end as is_new_product
+FROM (
+	select
+		prices.*,
+		prices.confirmed is NULL as `no_confirm`,
+		case when datediff(now(), prices.confirmed) > 365 then TRUE else FALSE end as `too_old_confirm`
+	from prices
+) AS `prices`
+	left join products on products.id = prices.product_id
+	left join categories on categories.id = products.category_id
 ;";
 
     /// <inheritdoc/>
@@ -64,7 +69,8 @@ from
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
     [Column ("confirmed")] public DateTime? Confirmed { get; set; } = null;
-    [Column ("is_changed"), VirtualColumn] public int Lowest { get; set; }
+    [Column ("too_old_confirm"), VirtualColumn] public int TooOld { get; set; }
+    [Column ("is_new_product"), VirtualColumn] public int Lowest { get; set; }
 
     /// <summary>製品</summary>
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
@@ -103,7 +109,8 @@ from
         Confirmed?.ToShortDateWithDayOfWeekString (),
         $"p{ProductId}.", 
         $"s{StoreId}.", 
-        Lowest == 1 ? "!!" : "",
+        Lowest == 1 ? "lowest" : "",
+        TooOld == 1 || Confirmed == null ? "too_old" : "",
         Remarks
     ];
 

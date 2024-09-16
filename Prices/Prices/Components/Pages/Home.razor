@@ -81,14 +81,17 @@
                 </MudTd>
             </GroupFooterTemplate>
             <RowTemplate>
-                @{ var (category, product, store) = GetRelations (context); }
+                @{
+                    var (category, product, store) = GetRelations (context);
+                    var old = context.TooOld > 0 || context.Confirmed == null;
+                }
                 @if (AllowGrouping) {
                     <MudHidden Breakpoint="Breakpoint.Xs">
                         <MudTd />
                         <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
                             <MudTooltip>
                                 <ChildContent>
-                                    <MudText Typo="Typo.body2" Style="font-size:var(--mud-typography-caption-size); color:var(--mud-palette-action-default);">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
+                                    <MudText Typo="Typo.body2" Style="@($"font-size:var(--mud-typography-caption-size); color:var(--mud-palette-action-{(old ? "disabled" : "default")});")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
                                 </ChildContent>
                                 <TooltipContent>
                                     <MudText Typo="Typo.inherit" Align="Align.Left">
