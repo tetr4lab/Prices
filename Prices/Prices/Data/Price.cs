@@ -32,16 +32,23 @@ public class Price : BaseModel<Price>, IBaseModel {
     };
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// カテゴリと製品で分類して単価昇順
+    /// 確認がないか、あっても1年より古いものは非優先
+    /// 単価のないものは非優先
+    /// </remarks>
     public static string BaseSelectSql => @"
 select 
     prices.*, 
-    CASE WHEN prices.product_id <> LAG(prices.product_id) OVER (
+    case when prices.product_id <> lag(prices.product_id) over (
       order by 
         categories.priority desc, categories.name,
         products.priority desc, products.name,
+        prices.confirmed is null,
+        case when datediff(now(), prices.confirmed) > 365 then 1 else 0 end,
         prices.price is null or prices.quantity is null,
         prices.price / prices.quantity
-    ) THEN 1 ELSE 0 END AS is_changed
+    ) then 1 else 0 end as is_changed
 from
     prices
     left join products on products.id = prices.product_id
