@@ -222,6 +222,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         return false;
         // 対象カラムのどれかが検索語に適合すれば真を返す
         bool Any (IEnumerable<string?> targets, string word) {
+            word = word.Replace ('\xA0', ' ').Replace ('␣', ' ');
             var eq = word.StartsWith ('=');
             var notEq = word.StartsWith ('!');
             var not = !notEq && word.StartsWith ('^');

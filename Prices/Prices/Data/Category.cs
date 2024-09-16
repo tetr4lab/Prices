@@ -51,7 +51,7 @@ public class Category : BaseModel<Category>, IBaseModel {
         $"y{Priority}.",
         $"c{Id}.",
         Name,
-        IsFood ? "is_food" : "not_food",
+        IsFood ? "_is_food_" : "_not_food_",
         Remarks
     ];
 

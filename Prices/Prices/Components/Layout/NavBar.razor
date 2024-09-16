@@ -59,6 +59,7 @@
                     <MudText Typo="Typo.inherit" Align="Align.Left">
                         <p>検索文字列</p>
                         <p>空白文字で区切られた部分が全て含まれると適合します。</p>
+                        <p>'␣'(U+2423)または'&nbsp;'(U+00A0)は区切られない空白文字として使えます。</p>
                         <p>'='が先行する部分は一致すると適合します。</p>
                         <p>'!'が先行する部分は一致すると適合しません。</p>
                         <p>'^'が先行する部分は含まれると適合しません。</p>
@@ -70,16 +71,16 @@
                         <p>'¥~.'価格</p>
                         <p>'x~.'数量</p>
                         <p>'y~.'優先順</p>
-                        <p>'is_food'/'not_food'食品</p>
-                        <p>'lowest'最安値</p>
-                        <p>'too_old'情報が古い</p>
-                        <p>'no_confirm'未確認</p>
+                        <p>'_is_food_'/'_not_food_'食品</p>
+                        <p>'_lowest_'/'_not_low_'最安値</p>
+                        <p>'_too_old_'/'_not_old_'情報が古い</p>
+                        <p>'_no_confirm_'/'_confirmed_'未確認</p>
                     </MudText>
                 </TooltipContent>
             </MudTooltip>
             <MudTooltip Text="古い情報を除外" Duration="1000">
                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FiberNew" OnClick="@(() => {
-                    var newText = $"!too_old";
+                    var newText = $"=_not_old_";
                     _filterText = _filterText == newText ? "" : newText;
                     OnClick ();
                 })" />

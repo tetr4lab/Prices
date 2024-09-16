@@ -109,9 +109,9 @@ FROM (
         Confirmed?.ToShortDateWithDayOfWeekString (),
         $"p{ProductId}.", 
         $"s{StoreId}.", 
-        Lowest == 1 ? "lowest" : "",
-        TooOld == 1 ? "too_old" : "",
-        Confirmed == null ? "no_confirm" : "",
+        Lowest == 1 ? "_lowest_" : "_not_low_",
+        TooOld == 1 ? "_too_old_" : "_not_old_",
+        Confirmed == null ? "_no_confirm_" : "_confirmed_",
         Remarks
     ];
 
