@@ -110,7 +110,8 @@ FROM (
         $"p{ProductId}.", 
         $"s{StoreId}.", 
         Lowest == 1 ? "lowest" : "",
-        TooOld == 1 || Confirmed == null ? "too_old" : "",
+        TooOld == 1 ? "too_old" : "",
+        Confirmed == null ? "no_confirm" : "",
         Remarks
     ];
 

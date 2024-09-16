@@ -72,9 +72,17 @@
                         <p>'y~.'優先順</p>
                         <p>'is_food'/'not_food'食品</p>
                         <p>'lowest'最安値</p>
-                        <p>'too_old'情報が古いか未確認</p>
+                        <p>'too_old'情報が古い</p>
+                        <p>'no_confirm'未確認</p>
                     </MudText>
                 </TooltipContent>
+            </MudTooltip>
+            <MudTooltip Text="古い情報を除外" Duration="1000">
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FiberNew" OnClick="@(() => {
+                    var newText = $"!too_old";
+                    _filterText = _filterText == newText ? "" : newText;
+                    OnClick ();
+                })" />
             </MudTooltip>
             @if (!OnClickChangeModeButton.Equals (EventCallback.Empty)) {
                 <MudIconButton Size="Size.Small" Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="(async () => await OnClickChangeModeButton.InvokeAsync ())" />
@@ -93,6 +101,12 @@
     /// <summary>検索文字列</summary>
     [CascadingParameter (Name = "Filter")] protected string FilterText { get; set; } = string.Empty;
 
+    /// <summary>検索文字列</summary>
+    private string _filterText = string.Empty;
+
+    /// <summary>前回の検索文字列</summary>
+    private string _lastFilterText = string.Empty;
+
     /// <summary>
     /// ホームページの判定
     /// サーチボタンのアクションが指定されていればナビゲーションバー
@@ -110,10 +124,24 @@
         }
     }
 
+    /// <summary>パラメータが更新された</summary>
+    protected override void OnParametersSet () {
+        base.OnParametersSet ();
+        if (_filterText != FilterText) {
+            _lastFilterText = _filterText;
+            _filterText = FilterText;
+        }
+    }
+
     /// <summary>検索ボタン(またはフィールドクリアボタン)が押された</summary>
     public void OnClick () {
         OnClickSearchButton.InvokeAsync(FilterText);
         searchField.BlurAsync();
+        if (_lastFilterText != _filterText) {
+            OnClickSearchButton.InvokeAsync(_filterText);
+            _lastFilterText = _filterText;
+            searchField.BlurAsync();
+        }
     }
 
 }
