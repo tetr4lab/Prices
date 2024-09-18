@@ -8,8 +8,20 @@
     <MudAlert Severity="Severity.Error" Elevation="3">Unable to connect to any of the specified database management hosts.</MudAlert>
 } else if (!DataSet.IsReady || items == null) {
     <MudProgressCircular Indeterminate="true" />
-} else {
-    if (items.Count > 0) {
+} else if (items.Count > 0) {
+    if (_table != null && _table.FilteredItems.Count() <= 0) {
+        <MudStack Row>
+            <MudSpacer />
+            <MudPaper Class="pa-3">
+                <MudText Typo="Typo.body2">
+                    <p>検索による絞り込みの結果、該当する項目が見つかりませんでした。</p>
+                    <p>カテゴリ、製品、店舗の名称で検索するには、それぞれの一覧画面に切り替えてください。</p>
+                    <p>さらに、左端の価格一覧ボタンを押すと、該当の価格を一覧できます。</p>
+                </MudText>
+            </MudPaper>
+            <MudSpacer />
+        </MudStack>
+    } else {
         <MudTable Items="items" Dense Hover Breakpoint="Breakpoint.Xs" @ref="_table"
                 Filter="new Func<Price, bool> (FilterFunc)"
                 SortLabel="⇅"
@@ -189,11 +201,10 @@
         <MudToolBar Dense Class="mb-2">
             @*hidden spacer*@
         </MudToolBar>
-    } else {
-        <MudText>No items found.</MudText>
     }
+} else {
+    <MudText>No items found.</MudText>
 }
-
 
 @code{
     /// <summary>直上の行との比較用</summary>
@@ -272,6 +283,13 @@
             item.Confirmed = null;
         }
         base.Commit (obj);
+    }
+
+    /// <summary>パラメータに変更があった (検索条件が変化した可能性)</summary>
+    protected override void OnParametersSet () {
+        base.OnParametersSet ();
+        // グループをたたむ
+        _table?.CollapseAllGroups ();
     }
 
 }
