@@ -48,7 +48,7 @@
         <MudStack Row Class="align-center">
             <MudTooltip Duration="1000">
                 <ChildContent>
-                    <MudTextField @bind-Value="FilterText" @ref="searchField"
+                    <MudTextField @bind-Value="_filterText" @ref="searchField"
                         OnKeyUp="OnKeyUp"
                         OnBlur="OnClick"
                         OnAdornmentClick="OnClick" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
@@ -105,9 +105,6 @@
     /// <summary>検索文字列</summary>
     private string _filterText = string.Empty;
 
-    /// <summary>前回の検索文字列</summary>
-    private string _lastFilterText = string.Empty;
-
     /// <summary>
     /// ホームページの判定
     /// サーチボタンのアクションが指定されていればナビゲーションバー
@@ -129,18 +126,14 @@
     protected override void OnParametersSet () {
         base.OnParametersSet ();
         if (_filterText != FilterText) {
-            _lastFilterText = _filterText;
             _filterText = FilterText;
         }
     }
 
     /// <summary>検索ボタン(またはフィールドクリアボタン)が押された</summary>
     public void OnClick () {
-        OnClickSearchButton.InvokeAsync(FilterText);
-        searchField.BlurAsync();
-        if (_lastFilterText != _filterText) {
+        if (FilterText != _filterText) {
             OnClickSearchButton.InvokeAsync(_filterText);
-            _lastFilterText = _filterText;
             searchField.BlurAsync();
         }
     }
