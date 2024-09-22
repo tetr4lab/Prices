@@ -53,7 +53,8 @@ builder.Services.AddAuthorization (options => {
         policyBuilder.RequireClaim (ClaimTypes.Email,
             builder.Configuration ["Identity:Claims:EmailAddress:Admin:0"]!,
             builder.Configuration ["Identity:Claims:EmailAddress:User:0"]!,
-            builder.Configuration ["Identity:Claims:EmailAddress:User:1"]!
+            builder.Configuration ["Identity:Claims:EmailAddress:User:1"]!,
+            builder.Configuration ["Identity:Claims:EmailAddress:User:2"]!
         );
     });
 });
