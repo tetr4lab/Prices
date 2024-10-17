@@ -22,7 +22,7 @@
             <MudSpacer />
         </MudStack>
     } else {
-        <MudTable Items="items" Dense Hover Breakpoint="Breakpoint.Xs" @ref="_table"
+        <MudTable Items="items" Dense Breakpoint="Breakpoint.Xs" @ref="_table"
                 Filter="new Func<Price, bool> (FilterFunc)"
                 SortLabel="⇅"
                 AllowUnsorted="true"
@@ -80,16 +80,16 @@
                     var price = context.Items.First ();
                     var filterText = $"p{price.ProductId}.";
                 }
-                <MudTd colspan="5" />
-                <MudTd Class="align-right">
-                    <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                        <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
-                    </MudTooltip>
-                </MudTd>
-                <MudTd>
-                    <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                        <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
-                    </MudTooltip>
+                <MudTd colspan="6" Class="pr-0">
+                    <MudStack Row>
+                        <MudSpacer />
+                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+                        </MudTooltip>
+                        <MudTooltip Text="この製品の価格を追加" Duration="1000">
+                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
+                        </MudTooltip>
+                    </MudStack>
                 </MudTd>
             </GroupFooterTemplate>
             <RowTemplate>

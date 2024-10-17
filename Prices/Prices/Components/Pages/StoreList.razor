@@ -71,13 +71,13 @@
                 <MudTd>
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Name" />
                 </MudTd>
-                <MudTd>
-                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
-                </MudTd>
-                <MudTd>
-                    <MudTooltip Text="@($"{Store.TableLabel}を追加")" Duration="1000">
-                        <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
-                    </MudTooltip>
+                <MudTd Class="pr-0">
+                    <MudStack Row>
+                        <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
+                        <MudTooltip Text="@($"{Store.TableLabel}を追加")" Duration="1000">
+                            <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
+                        </MudTooltip>
+                    </MudStack>
                 </MudTd>
             </FooterContent>
             <PagerContent>

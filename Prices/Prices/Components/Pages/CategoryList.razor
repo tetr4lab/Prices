@@ -10,6 +10,7 @@
     <MudProgressCircular Indeterminate="true" />
 } else {
     if (items.Count > 0) {
+        <style>.mud-table-container{overflow:visible;}</style>
         <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
                 Filter="new Func<Category, bool> (FilterFunc)"
                 SortLabel="⇅"
@@ -88,13 +89,13 @@
                     })" />
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.TaxRate)])">@(newItem.TaxPercentage)%</MudTd>
-                <MudTd>
-                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
-                </MudTd>
-                <MudTd>
-                    <MudTooltip Text="@($"{Category.TableLabel}を追加")" Duration="1000">
-                        <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
-                    </MudTooltip>
+                <MudTd Class="pr-0">
+                    <MudStack Row>
+                        <MudTextField FullWidth Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Remarks" />
+                        <MudTooltip Text="@($"{Category.TableLabel}を追加")" Duration="1000">
+                            <MudIconButton Size="Size.Small" Disabled="@(isAdding || !PricesDataSet.EntityIsValid (newItem))" OnClick="AddItem" Icon="@Icons.Material.Outlined.Add" />
+                        </MudTooltip>
+                    </MudStack>
                 </MudTd>
             </FooterContent>
             <PagerContent>
