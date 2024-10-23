@@ -187,7 +187,7 @@
                         <MudDivider Vertical="true" FlexItem="true" />
                         <MudStack Row Spacing="2" Class="align-center">
                             <MudText Typo="Typo.body2">税込</MudText>
-                            <MudSwitch T="bool" Style="margin-right:-5px;" ValueChanged="OnChangeTaxModeAsync" @ref="_taxSwitch" />
+                            <MudSwitch T="bool" Style="margin-right:-5px;" @bind-Value="_isTaxExcluded" />
                             <MudText Typo="Typo.body2">税抜</MudText>
                         </MudStack>
                     </MudStack>
@@ -222,7 +222,7 @@
     [CascadingParameter (Name = "SetTaxExcluded")] protected EventCallback<bool> SetTaxExcluded { get; set; }
 
     /// <summary>外税 スイッチの値</summary>
-    protected MudSwitch<bool> _taxSwitch = default!;
+    protected bool _isTaxExcluded;
 
     /// <summary>直上の行との比較用</summary>
     protected long lastCategoryId;
@@ -309,36 +309,29 @@
         _table?.CollapseAllGroups ();
     }
 
-    /// <summary>税モードの切り替え</summary>
+    /// <summary>税モードの反転</summary>
     protected async Task ChangeTaxModeAsync () {
-        System.Diagnostics.Debug.WriteLine ($"Home.ChangeTaxModeAsync {_taxSwitch is not null} {IsTaxExcluded.Value}");
-        if (IsTaxExcluded is not null && _taxSwitch is not null) {
-            IsTaxExcluded = IsTaxExcluded != true;
-            _taxSwitch.Value = IsTaxExcluded.Value;
-            await SetTaxExcluded.InvokeAsync (IsTaxExcluded.Value);
-            StateHasChanged();
-        }
-    }
-
-    /// <summary>税スイッチの切り替えを検出</summary>
-    protected async Task OnChangeTaxModeAsync () {
-        System.Diagnostics.Debug.WriteLine ($"Home.OnChangeTaxModeAsync {_taxSwitch is not null} {IsTaxExcluded} => {_taxSwitch.Value}");
-        if (_taxSwitch is not null) {
-            IsTaxExcluded = _taxSwitch.Value;
-            await SetTaxExcluded.InvokeAsync (IsTaxExcluded.Value);
+        if (IsTaxExcluded is not null) {
+            _isTaxExcluded = IsTaxExcluded != true;
+            await SetTaxExcluded.InvokeAsync (_isTaxExcluded);
         }
     }
 
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         await base.OnAfterRenderAsync (firstRender);
-        if (!_taxInited && IsTaxExcluded is not null && _taxSwitch is not null) {
-            // スイッチを初期化
-            System.Diagnostics.Debug.WriteLine ($"Home.OnAfterRenderAsync {_taxSwitch.Value} => {IsTaxExcluded.Value}");
-            _taxSwitch.Value = IsTaxExcluded.Value;
-            System.Diagnostics.Debug.WriteLine ($"Home.OnAfterRenderAsync2 {_taxSwitch.Value} => {IsTaxExcluded.Value}");
-            _taxInited = true;
-            StateHasChanged ();
+        if (IsTaxExcluded is not null) {
+            if (!_taxInited) {
+                // スイッチを初期化
+                if (_isTaxExcluded != IsTaxExcluded.Value) {
+                    _isTaxExcluded = IsTaxExcluded.Value;
+                    StateHasChanged ();
+                }
+                _taxInited = true;
+            } else if (IsTaxExcluded.Value != _isTaxExcluded) {
+                // スイッチの変化を反映
+                await SetTaxExcluded.InvokeAsync (_isTaxExcluded);
+            }
         }
     }
     protected bool _taxInited;

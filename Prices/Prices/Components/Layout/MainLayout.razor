@@ -92,7 +92,6 @@
 
     /// <summary>税切り替えボタンが押された</summary>
     protected async Task SetTaxExcludedAsync (bool taxExcluded) {
-        System.Diagnostics.Debug.WriteLine ($"SetTaxExcludedAsync {_isTaxExcluded} => {taxExcluded}");
         _isTaxExcluded = taxExcluded;
         await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
     }
@@ -106,7 +105,6 @@
             await Storage.SetAsync (DarkModeStorageKey, _isDarkMode);
             // 外税
             var taxExclueded = await Storage.GetAsync<bool> (TaxExcludedStorageKey);
-            System.Diagnostics.Debug.WriteLine ($"OnAfterRenderAsync {_isTaxExcluded} => {taxExclueded.Success} {taxExclueded.Value}");
             _isTaxExcluded = taxExclueded.Success ? taxExclueded.Value : false;
             await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
             StateHasChanged ();
