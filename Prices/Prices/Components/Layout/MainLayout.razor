@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage Storage
+@inject NavigationManager Navi
 
 @inherits LayoutComponentBase
 
@@ -87,29 +88,35 @@
     /// <summary>テーマ切替ボタンが押された</summary>
     protected async Task ChangeModeAsync () {
         _isDarkMode = !_isDarkMode;
-        await Storage.SetAsync (DarkModeStorageKey, _isDarkMode);
+        await SetAsync (DarkModeStorageKey, _isDarkMode);
     }
 
     /// <summary>税切り替えボタンが押された</summary>
     protected async Task SetTaxExcludedAsync (bool taxExcluded) {
         _isTaxExcluded = taxExcluded;
-        await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
+        await SetAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
     }
 
     /// <summary>遅延初期化</summary>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         if (firstRender) {
             // テーマ
-            var darkMode = await Storage.GetAsync<bool> (DarkModeStorageKey);
+            var darkMode = await GetAsync<bool> (DarkModeStorageKey);
             _isDarkMode = darkMode.Success ? darkMode.Value : await _mudThemeProvider.GetSystemPreference ();
-            await Storage.SetAsync (DarkModeStorageKey, _isDarkMode);
+            await SetAsync (DarkModeStorageKey, _isDarkMode);
             // 外税
-            var taxExclueded = await Storage.GetAsync<bool> (TaxExcludedStorageKey);
+            var taxExclueded = await GetAsync<bool> (TaxExcludedStorageKey);
             _isTaxExcluded = taxExclueded.Success ? taxExclueded.Value : false;
-            await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
+            await SetAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
             StateHasChanged ();
         }
     }
+
+    /// <summary>ストレージから取得</summary>
+    protected async Task<ProtectedBrowserStorageResult<T>> GetAsync<T> (string key) where T : notnull => await Storage.GetAsync<T> ($"{Navi.BaseUri}|{key}");
+
+    /// <summary>ストレージへ保存</summary>
+    protected async Task SetAsync<T> (string key, T data) where T : notnull => await Storage.SetAsync ($"{Navi.BaseUri}|{key}", data);
 
     /// <summary>ドロワーの状態</summary>
     protected bool _drawerOpen = false;
