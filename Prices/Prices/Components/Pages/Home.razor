@@ -50,7 +50,7 @@
                 <MudTh Class="align-right" Style="width: 9em;">
                     @(Price.Label [nameof (Price.PriceWithTax)])
                     <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="ChangeTaxModeAsync">
-                        @($"(税{(IsTaxExcluded == true ? "抜" : "込")})")
+                        (<MudText Color="@(IsTaxExcluded == true ? Color.Warning : Color.Success)" Typo="Typo.inherit">@(IsTaxExcluded == true ? "税抜" : "税込")</MudText>)
                     </MudButton>
                 </MudTh>
                 <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.Quantity)])</MudTh>
@@ -186,9 +186,9 @@
                         <MudCheckBox Size="Size.Small" @bind-Value="AllowGrouping"><MudText Typo="Typo.body2" Class="mr-3" Style="margin-left: -8px;">グループ</MudText></MudCheckBox>
                         <MudDivider Vertical="true" FlexItem="true" />
                         <MudStack Row Spacing="2" Class="align-center">
-                            <MudText Typo="Typo.body2">税込</MudText>
-                            <MudSwitch T="bool" Style="margin-right:-5px;" @bind-Value="_isTaxExcluded" />
-                            <MudText Typo="Typo.body2">税抜</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Success">税込</MudText>
+                            <MudSwitch T="bool" Color="Color.Warning" UncheckedColor="Color.Success" Style="margin-right:-5px;" @bind-Value="_isTaxExcluded" />
+                            <MudText Typo="Typo.body2" Color="Color.Warning">税抜</MudText>
                         </MudStack>
                     </MudStack>
                 </MudTd>
