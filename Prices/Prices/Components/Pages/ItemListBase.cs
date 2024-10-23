@@ -75,12 +75,12 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     }
 
     /// <summary>デフォルト項目数の設定</summary>
-    protected override Task OnAfterRenderAsync (bool firstRender) {
+    protected override async Task OnAfterRenderAsync (bool firstRender) {
+        await base.OnAfterRenderAsync (firstRender);
         if (_table != null && !_inited) {
             _inited = true;
             InitRowsPerPage ();
         }
-        return base.OnAfterRenderAsync (firstRender);
     }
     protected bool _inited;
 

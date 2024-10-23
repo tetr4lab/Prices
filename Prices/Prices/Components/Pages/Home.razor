@@ -49,8 +49,8 @@
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
                     @(Price.Label [nameof (Price.PriceWithTax)])
-                    <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="() => DataSet.TaxExcluded = !DataSet.TaxExcluded">
-                        @($"(税{(DataSet.TaxExcluded ? "抜" : "込")})")
+                    <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="ChangeTaxModeAsync">
+                        @($"(税{(IsTaxExcluded == true ? "抜" : "込")})")
                     </MudButton>
                 </MudTh>
                 <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.Quantity)])</MudTh>
@@ -68,8 +68,8 @@
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
-                <MudTd Class="align-right text-nowrap" Style="@(price.TooOld > 0 || price.Confirmed is null ? "color:var(--mud-palette-action-default);" : "")" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
-                    @(price.PriceWithTax is null ? "未記入" : $"¥{(DataSet.TaxExcluded ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
+                <MudTd Class="align-right text-nowrap" Style="@(price.TooOld > 0 || price.Confirmed is null ? "color:var(--mud-palette-action-default);" : "")" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(IsTaxExcluded == true ? "抜" : "込")})")">
+                    @(price.PriceWithTax is null ? "未記入" : $"¥{(IsTaxExcluded == true ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     @(price.Quantity is null ? "未記入" : $"{price.Quantity:#,0}{product?.Unit}")
@@ -107,7 +107,7 @@
                         <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
                             <MudTooltip>
                                 <ChildContent>
-                                    <MudText Typo="Typo.body2" Style="@($"color : var(--mud-palette-action-{(old ? "disabled" : "default")});;")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
+                                    <MudText Typo="Typo.body2" Style="@($"color:var(--mud-palette-action-{(old ? "disabled" : "default")});;")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
                                 </ChildContent>
                                 <TooltipContent>
                                     <MudText Typo="Typo.inherit" Align="Align.Left">
@@ -130,8 +130,8 @@
                     lastProductId = product?.Id ?? 0;
                     lastStoreId = store?.Id ?? 0;
                 }
-                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(DataSet.TaxExcluded ? "抜" : "込")})")">
-                    @(context.PriceWithTax is null ? "未記入" : $"¥{(DataSet.TaxExcluded ? context.PriceWithoutTax : context.PriceWithTax):#,0}")
+                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(IsTaxExcluded == true ? "抜" : "込")})")">
+                    @(context.PriceWithTax is null ? "未記入" : $"¥{(IsTaxExcluded == true ? context.PriceWithoutTax : context.PriceWithTax):#,0}")
                 </MudTd>
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
                     @(context.Quantity is null ? "未記入" : $"{context.Quantity:#,0}{product?.Unit}")
@@ -163,7 +163,7 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
-                    @if (DataSet.TaxExcluded) {
+                    @if (IsTaxExcluded == true) {
                         <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
                     } else {
                         <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
@@ -187,7 +187,7 @@
                         <MudDivider Vertical="true" FlexItem="true" />
                         <MudStack Row Spacing="2" Class="align-center">
                             <MudText Typo="Typo.body2">税込</MudText>
-                            <MudSwitch Style="margin-right:-5px;" @bind-Value="DataSet.TaxExcluded" />
+                            <MudSwitch T="bool" Style="margin-right:-5px;" ValueChanged="OnChangeTaxModeAsync" @ref="_taxSwitch" />
                             <MudText Typo="Typo.body2">税抜</MudText>
                         </MudStack>
                     </MudStack>
@@ -214,6 +214,16 @@
 }
 
 @code{
+
+    /// <summary>外税</summary>
+    [CascadingParameter (Name = "TaxExcluded")] protected bool? IsTaxExcluded { get; set; }
+
+    /// <summary>外税の設定</summary>
+    [CascadingParameter (Name = "SetTaxExcluded")] protected EventCallback<bool> SetTaxExcluded { get; set; }
+
+    /// <summary>外税 スイッチの値</summary>
+    protected MudSwitch<bool> _taxSwitch = default!;
+
     /// <summary>直上の行との比較用</summary>
     protected long lastCategoryId;
 
@@ -298,5 +308,39 @@
         // グループをたたむ
         _table?.CollapseAllGroups ();
     }
+
+    /// <summary>税モードの切り替え</summary>
+    protected async Task ChangeTaxModeAsync () {
+        System.Diagnostics.Debug.WriteLine ($"Home.ChangeTaxModeAsync {_taxSwitch is not null} {IsTaxExcluded.Value}");
+        if (IsTaxExcluded is not null && _taxSwitch is not null) {
+            IsTaxExcluded = IsTaxExcluded != true;
+            _taxSwitch.Value = IsTaxExcluded.Value;
+            await SetTaxExcluded.InvokeAsync (IsTaxExcluded.Value);
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>税スイッチの切り替えを検出</summary>
+    protected async Task OnChangeTaxModeAsync () {
+        System.Diagnostics.Debug.WriteLine ($"Home.OnChangeTaxModeAsync {_taxSwitch is not null} {IsTaxExcluded} => {_taxSwitch.Value}");
+        if (_taxSwitch is not null) {
+            IsTaxExcluded = _taxSwitch.Value;
+            await SetTaxExcluded.InvokeAsync (IsTaxExcluded.Value);
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync (bool firstRender) {
+        await base.OnAfterRenderAsync (firstRender);
+        if (!_taxInited && IsTaxExcluded is not null && _taxSwitch is not null) {
+            // スイッチを初期化
+            System.Diagnostics.Debug.WriteLine ($"Home.OnAfterRenderAsync {_taxSwitch.Value} => {IsTaxExcluded.Value}");
+            _taxSwitch.Value = IsTaxExcluded.Value;
+            System.Diagnostics.Debug.WriteLine ($"Home.OnAfterRenderAsync2 {_taxSwitch.Value} => {IsTaxExcluded.Value}");
+            _taxInited = true;
+            StateHasChanged ();
+        }
+    }
+    protected bool _taxInited;
 
 }

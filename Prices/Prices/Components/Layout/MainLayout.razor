@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage Storage
+
+@inherits LayoutComponentBase
 
 <PageTitle>Prices</PageTitle>
 
@@ -11,7 +14,7 @@
                     <MudDrawer Class="fixed" @bind-Open="@_drawerOpen" Anchor="Anchor.Top" Elevation="1" Variant="@DrawerVariant.Temporary">
                         <MudNavMenu Dense Color="Color.Dark" Class="px-4 my-2">
                             <CascadingValue Value="@_filterText" Name="Filter">
-                                <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeMode" />
+                                <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeModeAsync" />
                             </CascadingValue>
                         </MudNavMenu>
                     </MudDrawer>
@@ -20,7 +23,7 @@
                     <MudAppBar Color="Color.Transparent" Dense Fixed="true">
                         <MudGrid Class="align-center flex-nowrap" Spacing="0">
                             <CascadingValue Value="@_filterText" Name="Filter">
-                                <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeMode" />
+                                <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeModeAsync" />
                             </CascadingValue>
                         </MudGrid>
                     </MudAppBar>
@@ -40,7 +43,11 @@
                     <CascadingValue Value="@_filterText" Name="Filter">
                         <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetFilterText))" Name="SetFilter">
                             <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetSectionTitle))" Name="Section">
-                                @Body
+                                <CascadingValue Value="@_isTaxExcluded" Name="TaxExcluded">
+                                    <CascadingValue Value="@(EventCallback.Factory.Create<bool> (this, SetTaxExcludedAsync))" Name="SetTaxExcluded">
+                                        @Body
+                                    </CascadingValue>
+                                </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>
                     </CascadingValue>
@@ -62,19 +69,46 @@
 <MudSnackbarProvider />
 
 @code {
+    /// <summary>テーマ ストレージキー</summary>
+    protected const string DarkModeStorageKey = "IsDarkTheme";
+
+    /// <summary>テーマ ストレージキー</summary>
+    protected const string TaxExcludedStorageKey = "IsTaxExcluded";
 
     /// <summary>テーマプロバイダへの参照</summary>
     protected MudThemeProvider _mudThemeProvider = default!;
+
     /// <summary>ダークモード</summary>
     protected bool _isDarkMode;
 
-    /// <summary>モード切替ボタンが押された</summary>
-    protected void ChangeMode () => _isDarkMode = !_isDarkMode;
+    /// <summary>外税モード</summary>
+    protected bool? _isTaxExcluded = null;
 
-    /// <summary>システムのテーマモードで初期化</summary>
+    /// <summary>テーマ切替ボタンが押された</summary>
+    protected async Task ChangeModeAsync () {
+        _isDarkMode = !_isDarkMode;
+        await Storage.SetAsync (DarkModeStorageKey, _isDarkMode);
+    }
+
+    /// <summary>税切り替えボタンが押された</summary>
+    protected async Task SetTaxExcludedAsync (bool taxExcluded) {
+        System.Diagnostics.Debug.WriteLine ($"SetTaxExcludedAsync {_isTaxExcluded} => {taxExcluded}");
+        _isTaxExcluded = taxExcluded;
+        await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
+    }
+
+    /// <summary>遅延初期化</summary>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         if (firstRender) {
-            _isDarkMode = await _mudThemeProvider.GetSystemPreference ();
+            // テーマ
+            var darkMode = await Storage.GetAsync<bool> (DarkModeStorageKey);
+            _isDarkMode = darkMode.Success ? darkMode.Value : await _mudThemeProvider.GetSystemPreference ();
+            await Storage.SetAsync (DarkModeStorageKey, _isDarkMode);
+            // 外税
+            var taxExclueded = await Storage.GetAsync<bool> (TaxExcludedStorageKey);
+            System.Diagnostics.Debug.WriteLine ($"OnAfterRenderAsync {_isTaxExcluded} => {taxExclueded.Success} {taxExclueded.Value}");
+            _isTaxExcluded = taxExclueded.Success ? taxExclueded.Value : false;
+            await Storage.SetAsync (TaxExcludedStorageKey, _isTaxExcluded);
             StateHasChanged ();
         }
     }
