@@ -216,7 +216,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
         var item = GetT (obj);
         if (_table == null) { return; }
         // 確認ダイアログ
-        var dialogResult = await DialogService.Confirmation ([$"以下の{T.TableLabel}を完全に削除します。", item.ToString ()], title: $"{T.TableLabel}削除", position: DialogPosition.BottomCenter, acceptionLabel: "Delete", acceptionColor: Color.Error);
+        var dialogResult = await DialogService.Confirmation ([$"以下の{T.TableLabel}を完全に削除します。", item.ToString ()], title: $"{T.TableLabel}削除", position: DialogPosition.BottomCenter, acceptionLabel: "Delete", acceptionColor: Color.Error, acceptionIcon: Icons.Material.Filled.Delete);
         if (dialogResult != null && !dialogResult.Canceled && dialogResult.Data is bool ok && ok) {
             _table.SetEditingItem (null);
             var result = await DataSet.RemoveAsync (item);
