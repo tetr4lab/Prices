@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Tetr4lab;
 using Prices.Utilities;
-using static Prices.Services.PricesDataSet;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Prices.Components.Pages;
 
-public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>, IBaseModel, new() {
+public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseModel<T>, IPricesBaseModel, new() {
 
     /// <summary>ページング機能の有効性</summary>
     protected const bool AllowPaging = true;
@@ -20,6 +21,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     [Inject] protected PricesDataSet DataSet { get; set; } = null!;
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+    [Inject] protected IAuthorizationService AuthorizationService { get; set; } = null!;
 
     /// <summary>検索文字列</summary>
     [CascadingParameter (Name = "Filter")] protected string FilterText { get; set; } = string.Empty;
@@ -33,11 +35,20 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     /// <summary>セッション数の更新</summary>
     [CascadingParameter (Name = "Session")] protected EventCallback<int> UpdateSessionCount { get; set; }
 
+    /// <summary>認証状況を得る</summary>
+    [CascadingParameter] protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
     /// <summary>項目一覧</summary>
-    protected List<T>? items => DataSet.IsReady ? DataSet.GetAll<T> () : null;
+    protected List<T>? items => DataSet.IsReady ? DataSet.GetList<T> () : null;
 
     /// <summary>選択項目</summary>
     protected T selectedItem { get; set; } = new ();
+
+    /// <summary>認証済みID</summary>
+    protected AuthedIdentity? Identity { get; set; }
+
+    /// <summary>ユーザ識別子</summary>
+    protected string Useridentifier => Identity?.EmailAddress ?? Identity?.Name ?? "unknown";
 
     /// <summary>初期化</summary>
     protected override async Task OnInitializedAsync () {
@@ -45,6 +56,8 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
         // セッション数の変化を購読
         SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
+        // 認証・認可
+        Identity = (await AuthState).GetIdentity ();
         newItem = NewEditItem;
     }
 
@@ -120,7 +133,8 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     /// <summary>編集完了</summary>
     protected virtual async void Commit (object obj) {
         var item = GetT (obj);
-        if (EntityIsValid (item) && !backupedItem.Equals (item)) {
+        if (PricesDataSet.EntityIsValid (item) && !backupedItem.Equals (item)) {
+            item.Modifier = Useridentifier;
             var result = await DataSet.UpdateAsync (item);
             if (result.IsSuccess) {
                 await ReloadAndFocus (item.Id);
@@ -148,7 +162,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
         if (isAdding || items == null) { return; }
         isAdding = true;
         await StateHasChangedAsync ();
-        if (EntityIsValid (newItem)) {
+        if (PricesDataSet.EntityIsValid (newItem)) {
             var result = await DataSet.AddAsync (newItem);
             if (result.IsSuccess) {
                 lastCreatedId = result.Value.Id;
@@ -190,7 +204,11 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : BaseModel<T>
     }
 
     /// <summary>新規生成用の新規アイテム生成</summary>
-    protected virtual T NewEditItem => new ();
+    protected virtual T NewEditItem => new () {
+        DataSet = DataSet,
+        Creator = Useridentifier,
+        Modifier = Useridentifier,
+    };
 
     /// <summary>項目削除</summary>
     /// <param name="obj"></param>

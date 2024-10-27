@@ -7,7 +7,7 @@ using MudBlazor;
 namespace Prices.Data;
 
 [TableName ("products")]
-public class Product : BaseModel<Product>, IBaseModel {
+public class Product : PricesBaseModel<Product>, IPricesBaseModel {
     /// <inheritdoc/>
     public static string TableLabel => "製品";
 
@@ -35,7 +35,7 @@ public class Product : BaseModel<Product>, IBaseModel {
     [Column ("priority")] public int? Priority { get; set; } = null;
 
     /// <summary>カテゴリ get</summary>
-    public Category? Category (PricesDataSet dataSet) => dataSet.Categories.Find (i => i.Id == CategoryId);
+    public Category? Category (PricesDataSet dataSet) => dataSet.GetList<Category> ().Find (i => i.Id == CategoryId);
 
     /// <summary>カテゴリ set</summary>
     public Category Category (Category category) {

@@ -8,7 +8,7 @@ using System.Data;
 namespace Prices.Data;
 
 [TableName ("stores")]
-public class Store : BaseModel<Store>, IBaseModel {
+public class Store : PricesBaseModel<Store>, IPricesBaseModel {
     /// <inheritdoc/>
     public static string TableLabel => "店舗";
 

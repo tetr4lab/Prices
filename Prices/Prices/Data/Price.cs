@@ -11,7 +11,7 @@ using Tetr4lab;
 namespace Prices.Data;
 
 [TableName ("prices")]
-public class Price : BaseModel<Price>, IBaseModel {
+public class Price : PricesBaseModel<Price>, IPricesBaseModel {
     /// <inheritdoc/>
     public static string TableLabel => "価格";
 
@@ -76,7 +76,7 @@ FROM (
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
 
     /// <summary>カテゴリ</summary>
-    public Category? Category (PricesDataSet set) => set.Categories.Find (i => i.Id == Product (set)?.CategoryId);
+    public Category? Category (PricesDataSet set) => set.GetList<Category> ().Find (i => i.Id == Product (set)?.CategoryId);
 
     /// <summary>店舗</summary>
     public Store? Store (PricesDataSet set) => set.Stores.Find (i => i.Id == StoreId);
@@ -123,7 +123,7 @@ FROM (
         ProductId = productId;
         StoreId = storeId > 0 ? storeId : (dataSet.Stores.Count > 0 ? dataSet.Stores.Last ().Id : 0);
         var categoryId = dataSet.Products.Find (i => i.Id == productId)?.CategoryId;
-        TaxRate = categoryId == null ? 0 : dataSet.Categories.Find (i => i.Id == categoryId)?.TaxRate ?? 0;
+        TaxRate = categoryId == null ? 0 : dataSet.GetList<Category> ().Find (i => i.Id == categoryId)?.TaxRate ?? 0;
     }
 
     /// <inheritdoc/>

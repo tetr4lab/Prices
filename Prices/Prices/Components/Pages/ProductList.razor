@@ -61,7 +61,7 @@
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.CategoryId)])">
                     <MudSelect T="long" Clearable="false" @bind-Value="context.CategoryId">
-                        @foreach (var category in DataSet.Categories) {
+                        @foreach (var category in DataSet.GetList<Category> ()) {
                             <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
                         }
                     </MudSelect>
@@ -84,7 +84,7 @@
                 </MudTd>
                 <MudTd>
                     <MudSelect Class="align-left" Typo="Typo.body2" T="long" Clearable="false" @bind-Value="newItem.CategoryId">
-                        @foreach (var category in DataSet.Categories) {
+                        @foreach (var category in DataSet.GetList<Category> ()) {
                             <MudSelectItem Value="category.Id">@(category.Name)</MudSelectItem>
                         }
                     </MudSelect>
@@ -124,7 +124,7 @@
 
 @code {
     /// <summary>新規生成用アイテムの生成 最初のカテゴリをデフォルトに使用</summary>
-    protected override Product NewEditItem => new Product { CategoryId = DataSet.Categories.Count > 0 ? DataSet.Categories [0].Id : 0 };
+    protected override Product NewEditItem => new Product { CategoryId = DataSet.GetList<Category> ().Count > 0 ? DataSet.GetList<Category> () [0].Id : 0 };
 
     /// <inheritdoc/>
     protected override async Task AddItem () {

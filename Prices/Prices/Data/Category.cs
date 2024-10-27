@@ -7,7 +7,7 @@ using MudBlazor;
 namespace Prices.Data;
 
 [TableName ("categories")]
-public class Category : BaseModel<Category>, IBaseModel {
+public class Category : PricesBaseModel<Category>, IPricesBaseModel {
     /// <summary>食品の税率</summary>
     public static readonly float TaxRateForFood = 0.08f;
 
