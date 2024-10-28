@@ -48,7 +48,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
     protected AuthedIdentity? Identity { get; set; }
 
     /// <summary>ユーザ識別子</summary>
-    protected string Useridentifier => Identity?.EmailAddress ?? Identity?.Name ?? "unknown";
+    protected string UserIdentifier => Identity?.Identifier ?? "unknown";
 
     /// <summary>初期化</summary>
     protected override async Task OnInitializedAsync () {
@@ -57,7 +57,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
         // セッション数の変化を購読
         SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
         // 認証・認可
-        Identity = (await AuthState).GetIdentity ();
+        Identity = await AuthState.GetIdentityAsync ();
         newItem = NewEditItem;
     }
 
@@ -134,7 +134,7 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
     protected virtual async void Commit (object obj) {
         var item = GetT (obj);
         if (PricesDataSet.EntityIsValid (item) && !backupedItem.Equals (item)) {
-            item.Modifier = Useridentifier;
+            item.Modifier = UserIdentifier;
             var result = await DataSet.UpdateAsync (item);
             if (result.IsSuccess) {
                 await ReloadAndFocus (item.Id);
@@ -206,8 +206,8 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
     /// <summary>新規生成用の新規アイテム生成</summary>
     protected virtual T NewEditItem => new () {
         DataSet = DataSet,
-        Creator = Useridentifier,
-        Modifier = Useridentifier,
+        Creator = UserIdentifier,
+        Modifier = UserIdentifier,
     };
 
     /// <summary>項目削除</summary>

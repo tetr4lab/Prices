@@ -24,7 +24,7 @@
     <PackageReference Include="PetaPoco.Compiled" Version="6.0.683" />
     <PackageReference Include="Tetr4lab" Version="1.0.4" />
     <PackageReference Include="Tetr4labDatabase" Version="1.0.20" />
-    <PackageReference Include="Tetr4labRazor" Version="1.0.7" />
+    <PackageReference Include="Tetr4labRazor" Version="1.0.11" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
