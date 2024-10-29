@@ -16,7 +16,7 @@ public class Price : PricesBaseModel<Price>, IPricesBaseModel {
     public static string TableLabel => "価格";
 
     /// <inheritdoc/>
-    public static Dictionary<string, string> Label { get; } = new Dictionary<string, string> {
+    public static Dictionary<string, string> Label { get; } = new () {
         { nameof (Id), "ID" },
         { nameof (Created), "生成日時" },
         { nameof (Modified), "更新日時" },
