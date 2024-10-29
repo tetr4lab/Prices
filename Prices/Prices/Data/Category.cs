@@ -86,7 +86,7 @@ public class Category : PricesBaseModel<Category>, IPricesBaseModel {
     ;
 
     /// <inheritdoc/>
-    public override int GetHashCode () => HashCode.Combine (Id, Name, IsFood, TaxRate, Remarks);
+    public override int GetHashCode () => HashCode.Combine (base.GetHashCode (), Name, IsFood, TaxRate, Priority);
 
     /// <inheritdoc/>
     public override string ToString () => $"{TableLabel} {Id}: {Name}{(IsFood ? " (食品)" : "")} 税{TaxRate * 100:F2}% \"{Remarks}\"";

@@ -163,7 +163,7 @@ FROM (
     ;
 
     /// <inheritdoc/>
-    public override int GetHashCode () => HashCode.Combine (Id, PriceWithTax, Quantity, UnitPrice, TaxRate, ProductId, StoreId, Confirmed);
+    public override int GetHashCode () => HashCode.Combine (base.GetHashCode (), PriceWithTax, Quantity, UnitPrice, TaxRate, ProductId, StoreId, Confirmed);
 
     /// <inheritdoc/>
     public override string ToString () => $"{TableLabel} {Id}: {ProductId} {StoreId} ¥{PriceWithTax} {Quantity} @{UnitPrice} {TaxRate * 100:F2}% {Confirmed} \"{Remarks}\"";

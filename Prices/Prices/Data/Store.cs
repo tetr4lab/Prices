@@ -67,7 +67,7 @@ public class Store : PricesBaseModel<Store>, IPricesBaseModel {
     ;
 
     /// <inheritdoc/>
-    public override int GetHashCode () => HashCode.Combine (Id, Name, Remarks);
+    public override int GetHashCode () => HashCode.Combine (base.GetHashCode (), Name, Priority);
 
     /// <inheritdoc/>
     public override string ToString () => $"{TableLabel} {Id}: {Name} \"{Remarks}\"";
