@@ -12,6 +12,10 @@ namespace Prices.Data;
 
 [TableName ("prices")]
 public class Price : PricesBaseModel<Price>, IPricesBaseModel {
+
+    /// <summary>比較対象から外す経過日数</summary>
+    private const int TooOldDays = 365 / 2;
+
     /// <inheritdoc/>
     public static string TableLabel => "価格";
 
@@ -34,10 +38,10 @@ public class Price : PricesBaseModel<Price>, IPricesBaseModel {
     /// <inheritdoc/>
     /// <remarks>
     /// カテゴリと製品で分類して単価昇順
-    /// 確認がないか、あっても1年より古いものは非優先
+    /// 確認がないか、あってもTooOldDaysより古いものは非優先
     /// 単価のないものは非優先
     /// </remarks>
-    public static string BaseSelectSql => @"
+    public static string BaseSelectSql => @$"
 select 
     prices.*,
     case when prices.product_id <> lag(prices.product_id) over (
@@ -53,7 +57,7 @@ FROM (
 	select
 		prices.*,
 		prices.confirmed is NULL as `no_confirm`,
-		case when datediff(now(), prices.confirmed) > 365 then TRUE else FALSE end as `too_old_confirm`
+		case when datediff(now(), prices.confirmed) > {TooOldDays} then TRUE else FALSE end as `too_old_confirm`
 	from prices
 ) AS `prices`
 	left join products on products.id = prices.product_id
