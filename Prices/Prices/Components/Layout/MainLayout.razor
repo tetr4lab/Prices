@@ -88,35 +88,29 @@
     /// <summary>テーマ切替ボタンが押された</summary>
     protected async Task ChangeModeAsync () {
         _isDarkMode = !_isDarkMode;
-        await SetAsync (DarkModeStorageKey, _isDarkMode);
+        await Storage.SetValueAsync (DarkModeStorageKey, _isDarkMode);
     }
 
     /// <summary>税切り替えボタンが押された</summary>
     protected async Task SetTaxExcludedAsync (bool taxExcluded) {
         _isTaxExcluded = taxExcluded;
-        await SetAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
+        await Storage.SetValueAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
     }
 
     /// <summary>遅延初期化</summary>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         if (firstRender) {
             // テーマ
-            var darkMode = await GetAsync<bool> (DarkModeStorageKey);
+            var darkMode = await Storage.GetValueAsync<bool> (DarkModeStorageKey);
             _isDarkMode = darkMode.Success ? darkMode.Value : await _mudThemeProvider.GetSystemPreference ();
-            await SetAsync (DarkModeStorageKey, _isDarkMode);
+            await Storage.SetValueAsync (DarkModeStorageKey, _isDarkMode);
             // 外税
-            var taxExclueded = await GetAsync<bool> (TaxExcludedStorageKey);
+            var taxExclueded = await Storage.GetValueAsync<bool> (TaxExcludedStorageKey);
             _isTaxExcluded = taxExclueded.Success ? taxExclueded.Value : false;
-            await SetAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
+            await Storage.SetValueAsync (TaxExcludedStorageKey, _isTaxExcluded.Value);
             StateHasChanged ();
         }
     }
-
-    /// <summary>ストレージから取得</summary>
-    protected async Task<ProtectedBrowserStorageResult<T>> GetAsync<T> (string key) where T : notnull => await Storage.GetAsync<T> ($"{Navi.BaseUri}|{key}");
-
-    /// <summary>ストレージへ保存</summary>
-    protected async Task SetAsync<T> (string key, T data) where T : notnull => await Storage.SetAsync ($"{Navi.BaseUri}|{key}", data);
 
     /// <summary>ドロワーの状態</summary>
     protected bool _drawerOpen = false;

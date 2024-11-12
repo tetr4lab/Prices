@@ -25,7 +25,7 @@
     <PackageReference Include="Tetr4lab" Version="1.0.8" />
     <PackageReference Include="Tetr4labAuth" Version="1.0.1" />
     <PackageReference Include="Tetr4labDatabase" Version="1.0.22" />
-    <PackageReference Include="Tetr4labRazor" Version="1.0.13" />
+    <PackageReference Include="Tetr4labRazor" Version="1.0.15" />
   </ItemGroup>
 
   <ItemGroup>
