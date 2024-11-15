@@ -2,8 +2,11 @@
 title: 日用品価格比較
 tags: Blazor ASP.NET MudBlazor PetaPoco MySQL MariaDB
 ---
+
 # 日用品価格比較
 ## はじめに
+これは極めて個人的なプロジェクトです。
+
 ### 目的
 日用品を調達する際の仕入れ先の選定に用いるため、売価を収集して比較できるようにします。
 
@@ -13,9 +16,9 @@ tags: Blazor ASP.NET MudBlazor PetaPoco MySQL MariaDB
 ### 環境
 #### ビルド
 - .NET 8.0
-- MudBlazor 7.8.0
-- PetaPoco 6.0.677
-- MySqlConnector 2.3.7
+- MudBlazor 7.15.0
+- PetaPoco 6.0.683
+- MySqlConnector 2.4.0
 
 #### サーバ
 
@@ -40,6 +43,7 @@ https://zenn.dev/tetr4lab/articles/ad947ade600764
   - 備考
 - 製品
   - 名前
+  - 画像
   - カテゴリ: 参照
   - 単位
   - 表示優先度
@@ -123,6 +127,7 @@ CREATE TABLE `products` (
   `unit` varchar(50) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   `priority` int(11) DEFAULT NULL,
+  `image` LONGBLOB NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `category_id` (`category_id`),
@@ -216,6 +221,7 @@ DELIMITER ;
       - 確認: ダイアログ
     - 優先度: 列フィールド
     - 名前: 列フィールド
+    - 画像: 列フィールド
     - カテゴリ: 列セレクタ
     - 備考: 列フィールド
     - 編集: 行ボタン

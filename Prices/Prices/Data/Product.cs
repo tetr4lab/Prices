@@ -21,6 +21,7 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
         { nameof (Unit), "単位" },
         { nameof (Remarks), "備考" },
         { nameof (Priority), "優先順" },
+        { nameof (Image), "画像" },
     };
 
     /// <inheritdoc/>
@@ -33,6 +34,7 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
     [Column ("category_id"), Required] public long CategoryId { get; set; } = 0;
     [Column ("unit"), StringLength (50)] public string? Unit { get; set; }
     [Column ("priority")] public int? Priority { get; set; } = null;
+    [Column ("image")] public byte []? Image { get; set; } = null;
 
     /// <summary>カテゴリ get</summary>
     public Category? Category (PricesDataSet dataSet) => dataSet.GetList<Category> ().Find (i => i.Id == CategoryId);
@@ -63,6 +65,7 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
         item.CategoryId = CategoryId;
         item.Unit = Unit;
         item.Priority = Priority;
+        item.Image = Image;
         return item;
     }
 
@@ -72,6 +75,7 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
         destination.CategoryId = CategoryId;
         destination.Unit = Unit;
         destination.Priority = Priority;
+        destination.Image = Image;
         return base.CopyTo (destination);
     }
 
@@ -84,10 +88,11 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
         && Unit == other.Unit
         && Remarks == other.Remarks
         && Priority == other.Priority
+        && Image == other.Image
     ;
 
     /// <inheritdoc/>
-    public override int GetHashCode () => HashCode.Combine (base.GetHashCode (), Name, CategoryId, Unit, Priority);
+    public override int GetHashCode () => HashCode.Combine (base.GetHashCode (), Name, CategoryId, Unit, Priority, Image);
 
     /// <inheritdoc/>
     public override string ToString () => $"{TableLabel} {Id}: {Name} {CategoryId} {Unit} \"{Remarks}\"";

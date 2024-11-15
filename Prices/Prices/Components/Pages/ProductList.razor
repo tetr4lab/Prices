@@ -11,27 +11,28 @@
 } else {
     if (items.Count > 0) {
         <MudTable Items="items" Dense Hover Striped Breakpoint="Breakpoint.Xs" @ref="_table"
-                Filter="new Func<Product, bool> (FilterFunc)"
-                SortLabel="⇅"
-                AllowUnsorted="true"
-                @bind-SelectedItem="selectedItem"
-                CommitEditTooltip="保存"
-                CancelEditTooltip="取消"
-                RowEditPreview="Edit"
-                RowEditCancel="Cancel"
-                RowEditCommit="Commit"
-                FooterClass="mud-background-gray"
-                ReadOnly="false"
-                CanCancelEdit="true"
-                IsEditRowSwitchingBlocked="true"
-                ApplyButtonPosition="TableApplyButtonPosition.End"
-                EditButtonPosition="TableEditButtonPosition.End"
-                EditTrigger="TableEditTrigger.EditButton">
+        Filter="new Func<Product, bool> (FilterFunc)"
+        SortLabel="⇅"
+        AllowUnsorted="true"
+        @bind-SelectedItem="selectedItem"
+        CommitEditTooltip="保存"
+        CancelEditTooltip="取消"
+        RowEditPreview="Edit"
+        RowEditCancel="Cancel"
+        RowEditCommit="Commit"
+        FooterClass="mud-background-gray"
+        ReadOnly="false"
+        CanCancelEdit="true"
+        IsEditRowSwitchingBlocked="true"
+        ApplyButtonPosition="TableApplyButtonPosition.End"
+        EditButtonPosition="TableEditButtonPosition.End"
+        EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
                 <MudTh Style="width: 8em;"><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Product, object>(x=>x.Priority ?? 0)"><MudIcon Icon="@Icons.Material.Outlined.Sort" Size="Size.Small" /></MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Category (DataSet)?.Name)">@(Product.Label [nameof (Product.CategoryId)])</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Name)">@(Product.Label [nameof (Product.Name)])</MudTableSortLabel></MudTh>
-                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label [nameof (Product.Unit)])</MudTableSortLabel></MudTh>
+                <MudTh>@(Product.Label[nameof(Product.Image)])</MudTh>
+                <MudTh Style="width: 8em;"><MudTableSortLabel SortBy="new Func<Product, string?>(x=>x.Unit)">@(Product.Label[nameof(Product.Unit)])</MudTableSortLabel></MudTh>
                 <MudTh>@(Product.Label [nameof (Product.Remarks)])</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -46,6 +47,11 @@
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.CategoryId)])">@(context.Category (DataSet)?.Name)</MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">@(context.Name)</MudTd>
+                <MudTd Class="pa-0" Style="width:80px;" DataLabel="@(Product.Label[nameof(Product.Image)])">
+                    @if (context.Image is not null) {
+                        <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                    }
+                </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">@(context.Unit)</MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Remarks)])">@context.Remarks</MudTd>
             </RowTemplate>
@@ -68,6 +74,22 @@
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
+                </MudTd>
+                <MudTd DataLabel="@(Product.Label[nameof(Product.Image)])">
+                    <MudFileUpload T="IBrowserFile" Accept=".jpg, .jpeg, .png" FilesChanged="file => UploadFileAsync (file, context)">
+                        <ActivatorContent>
+                            <MudButton Color="Color.Tertiary" Disabled="@(isUploading)" Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.CloudUpload">
+                                @if (context.Image is null) {
+                                    @("Image")
+                                } else {
+                                    <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                                }
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+                    @if (context.Image is not null) {
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => DeleteFile (context)" />
+                    }
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Unit" />
@@ -92,6 +114,7 @@
                 <MudTd>
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Name" />
                 </MudTd>
+                <MudTd></MudTd>
                 <MudTd>
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="newItem.Unit" />
                 </MudTd>
@@ -140,4 +163,40 @@
             }
         }
     }
+
+    /// <summary>画像サイズ制限</summary>
+    protected const int MAX_ALLOWED_IMAGE_SIZE = 1024 * 1024 * 10;
+
+    /// <summary>アップロード中</summary>
+    protected bool isUploading = false;
+
+    /// <summary>画像のアップロード</summary>
+    protected async void UploadFileAsync(IBrowserFile file, Product item) {
+        if (isUploading || file == null) { return; }
+        isUploading = true;
+        try {
+            using (var fs = file.OpenReadStream(MAX_ALLOWED_IMAGE_SIZE))
+            using (var ms = new MemoryStream()) {
+                await fs.CopyToAsync(ms);
+                item.Image = ms.ToArray();
+            }
+        }
+        catch (System.IO.IOException ex) {
+            if (ex.Message.Contains("exceeds the maximum of")) {
+                Snackbar.Add($"ファイルサイズが大きすぎます。(Max {MAX_ALLOWED_IMAGE_SIZE:#,0}byte)");
+            } else {
+                throw;
+            }
+        }
+        isUploading = false;
+        StateHasChanged ();
+        return;
+    }
+
+    /// <summary>画像の抹消</summary>
+    protected void DeleteFile (Product item) {
+        item.Image = null;
+        StateHasChanged ();
+    }
+
 }

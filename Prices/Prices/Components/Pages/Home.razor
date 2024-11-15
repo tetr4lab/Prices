@@ -66,7 +66,15 @@
                     var (category, product, store) = GetRelations (price);
                 }
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
-                <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(product?.Name)</MudTd>
+                <MudTd Class="py-0" DataLabel="@(Price.Label[nameof(Price.ProductId)])">
+                    <MudStack Row Spacing="1" Class="align-center">
+                        @(product?.Name)
+                        <MudSpacer />
+                        @if (product?.Image is not null) {
+                            <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                        }
+                    </MudStack>
+                </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
                 <MudTd Class="align-right text-nowrap" Style="@(price.TooOld > 0 || price.Confirmed is null ? "color:var(--mud-palette-action-default);" : "")" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(IsTaxExcluded == true ? "抜" : "込")})")">
                     @(price.PriceWithTax is null ? "未記入" : $"¥{(IsTaxExcluded == true ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
