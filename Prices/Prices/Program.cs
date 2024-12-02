@@ -1,4 +1,5 @@
-﻿using MudBlazor;
+﻿using Microsoft.AspNetCore.Components.Server.Circuits;
+using MudBlazor;
 using MudBlazor.Services;
 using PetaPoco;
 using Prices.Components;
@@ -45,6 +46,9 @@ await builder.Services.AddAuthorizationAsync (
 // ページにカスケーディングパラメータ`Task<AuthenticationState>`を提供
 builder.Services.AddCascadingAuthenticationState ();
 #endif
+
+// 回路の閉鎖を検出するCircuitHandlerをセッション毎に使う
+builder.Services.AddScoped<CircuitHandler, CircuitClosureDetector> ();
 
 // PetaPoco with MySqlConnector
 builder.Services.AddScoped (_ => (Database) new MySqlDatabase (connectionString, "MySqlConnector"));
