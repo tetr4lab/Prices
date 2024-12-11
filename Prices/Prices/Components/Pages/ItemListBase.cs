@@ -6,7 +6,6 @@ using Tetr4lab;
 using Prices.Utilities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Server.Circuits;
 
 namespace Prices.Components.Pages;
 
@@ -23,7 +22,6 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
     [Inject] protected IAuthorizationService AuthorizationService { get; set; } = null!;
-    [Inject] protected CircuitHandler CircuitHandler { get; set; } = null!;
 
     /// <summary>検索文字列</summary>
     [CascadingParameter (Name = "Filter")] protected string FilterText { get; set; } = string.Empty;
@@ -56,12 +54,6 @@ public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseMo
     protected override async Task OnInitializedAsync () {
         await base.OnInitializedAsync ();
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
-        // セッション数の変化を購読
-        SessionCounter.Subscribe (this, () => InvokeAsync (StateHasChanged));
-        // 切断検出
-        if (CircuitHandler is CircuitClosureDetector handler) {
-            handler.Disconnected += id => SessionCounter.Unsubscribe (this);
-        }
         // 認証・認可
         Identity = await AuthState.GetIdentityAsync ();
         newItem = NewEditItem;
