@@ -3,7 +3,6 @@ using Prices.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Tetr4lab;
-using Prices.Utilities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Authorization;
 
