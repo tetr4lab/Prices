@@ -68,7 +68,9 @@
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
                 <MudTd Class="py-0" DataLabel="@(Price.Label[nameof(Price.ProductId)])">
                     <MudStack Row Spacing="1" Class="align-center">
-                        @(product?.Name)
+                        <MudTooltip Text="@(product?.Remarks)" Duration="1000">
+                            @(product?.Name)
+                        </MudTooltip>
                         <MudSpacer />
                         @if (product?.Image is not null) {
                             <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
