@@ -23,25 +23,25 @@
         </MudStack>
     } else {
         <MudTable Items="items" Dense Breakpoint="Breakpoint.Xs" @ref="_table"
-                Filter="new Func<Price, bool> (FilterFunc)"
-                SortLabel="⇅"
-                AllowUnsorted="true"
-                @bind-SelectedItem="selectedItem"
-                CommitEditTooltip="保存"
-                CancelEditTooltip="取消"
-                RowEditPreview="Edit"
-                RowEditCancel="Cancel"
-                RowEditCommit="Commit"
-                FooterClass="mud-background-gray"
-                Striped="@(!AllowGrouping)"
-                GroupBy="@(AllowGrouping ? groupDefinition : null)"
-                GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
-                ReadOnly="false"
-                CanCancelEdit="true"
-                IsEditRowSwitchingBlocked="true"
-                ApplyButtonPosition="TableApplyButtonPosition.End"
-                EditButtonPosition="TableEditButtonPosition.End"
-                EditTrigger="TableEditTrigger.EditButton">
+        Filter="new Func<Price, bool> (FilterFunc)"
+        SortLabel="⇅"
+        AllowUnsorted="true"
+        @bind-SelectedItem="selectedItem"
+        CommitEditTooltip="保存"
+        CancelEditTooltip="取消"
+        RowEditPreview="Edit"
+        RowEditCancel="Cancel"
+        RowEditCommit="Commit"
+        FooterClass="mud-background-gray"
+        Striped="@(!AllowGrouping)"
+        GroupBy="@(AllowGrouping ? groupDefinition : null)"
+        GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
+        ReadOnly="false"
+        CanCancelEdit="true"
+        IsEditRowSwitchingBlocked="true"
+        ApplyButtonPosition="TableApplyButtonPosition.End"
+        EditButtonPosition="TableEditButtonPosition.End"
+        EditTrigger="TableEditTrigger.EditButton">
             <HeaderContent>
                 @{ CheckPageChangedAndCollapse (); }
                 <MudTh>@(Price.Label [nameof (Price.Category)])</MudTh>
@@ -161,7 +161,7 @@
                     </MudStack>
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
-                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Margin="0" @bind-Date="context.Confirmed" />
+                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Clearable Margin="0" @bind-Date="context.Confirmed" />
                 </MudTd>
                 <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">
                     <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.StoreId">
@@ -300,9 +300,15 @@
     }
 
     /// <summary>編集で単価が有効になったら確認日時を設定</summary>
+    /// <remarks>
+    ///  未確認に単価が記入されると現在日時が補間される
+    ///  確認済みの日時が消されると単価があっても未確認に戻る
+    ///  単価のある未確認を編集・保存すると現在日時が補間される
+    ///  単価を喪失すると未確認になる
+    ///  //</remarks>
     protected override void Commit (object obj) {
         var item = GetT (obj);
-        if (item.UnitPrice != null && item.Confirmed == null) {
+        if (item.UnitPrice != null && item.Confirmed == null && backupedItem.Confirmed == null) {
             item.Confirmed = DateTime.Now;
         } else if (item.UnitPrice == null && item.Confirmed != null) {
             item.Confirmed = null;
