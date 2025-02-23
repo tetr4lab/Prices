@@ -73,7 +73,14 @@
                         </MudTooltip>
                         <MudSpacer />
                         @if (product?.Image is not null) {
-                            <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                            <MudTooltip Color="Color.Transparent" Duration="1000">
+                                <ChildContent>
+                                    <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                </ChildContent>
+                                <TooltipContent>
+                                    <MudImage Elevation="5" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                </TooltipContent>
+                            </MudTooltip>
                         }
                     </MudStack>
                 </MudTd>

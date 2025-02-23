@@ -49,7 +49,14 @@
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">@(context.Name)</MudTd>
                 <MudTd Class="pa-0" Style="width:80px;" DataLabel="@(Product.Label[nameof(Product.Image)])">
                     @if (context.Image is not null) {
-                        <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                        <MudTooltip Color="Color.Transparent" Duration="1000">
+                            <ChildContent>
+                                <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                            </ChildContent>
+                            <TooltipContent>
+                                <MudImage Elevation="5" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                            </TooltipContent>
+                        </MudTooltip>
                     }
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Unit)])">@(context.Unit)</MudTd>
