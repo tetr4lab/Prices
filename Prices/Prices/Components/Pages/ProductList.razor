@@ -172,7 +172,7 @@
 
     /// <summary>画像のアップロード</summary>
     protected async void UploadFileAsync(IBrowserFile file, Product item) {
-        if (isUploading || file == null) { return; }
+        if (isUploading || file is null) { return; }
         isUploading = true;
         try {
             using (var fs = file.OpenReadStream(MAX_ALLOWED_IMAGE_SIZE))
