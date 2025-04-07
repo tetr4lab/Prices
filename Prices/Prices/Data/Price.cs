@@ -51,7 +51,8 @@ select
         prices.`no_confirm`,
         prices.`too_old_confirm`,
         prices.price is null or prices.quantity is NULL,
-        prices.price / prices.quantity
+        prices.price / prices.quantity,
+        prices.confirmed desc
     ) then TRUE else FALSE end as is_new_product
 FROM (
 	select
