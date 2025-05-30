@@ -5,6 +5,7 @@ using PetaPoco;
 using Prices.Components;
 using Prices.Services;
 using Tetr4lab;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder (args);
 var connectionString = $"database=prices;{builder.Configuration.GetConnectionString ("Host")}{builder.Configuration.GetConnectionString ("Account")}Allow User Variables=true;";
@@ -67,6 +68,7 @@ app.UseRequestLocalization (new RequestLocalizationOptions ()
     .AddSupportedCultures (["ja-JP",])
     .AddSupportedUICultures (["ja-JP",])
 );
+Thread.CurrentThread.CurrentCulture = new CultureInfo ("ja-JP");
 
 // Application Base Path
 var basePath = builder.Configuration ["AppBasePath"];
