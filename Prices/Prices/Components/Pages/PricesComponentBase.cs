@@ -3,6 +3,8 @@ using Prices.Services;
 
 namespace Prices.Components.Pages;
 
+/// <summary>コンポーネント基底クラス</summary>
 public class PricesComponentBase : ComponentBase {
-    [CascadingParameter] public AppLockState AppLock { get; set; } = null!;
+    [Inject] protected AppLockState AppLockState { get; set; } = null!;
+    [Inject] protected AppModeManager AppModeManager { get; set; } = null!;
 }

@@ -1,0 +1,365 @@
+﻿@inherits ItemListBase<Price>
+
+<PageTitle>Prices Home</PageTitle>
+
+@if (DataSet.IsUnavailable) {
+    <MudAlert Severity="Severity.Error" Elevation="3">Unable to connect to any of the specified database management hosts.</MudAlert>
+} else if (!DataSet.IsReady || items is null) {
+    <MudProgressCircular Indeterminate="true" />
+} else if (items.Count > 0) {
+    if (_table != null && _table.FilteredItems.Count() <= 0) {
+        <MudStack Row>
+            <MudSpacer />
+            <MudPaper Class="pa-3">
+                <MudText Typo="Typo.body2">
+                    <p>検索による絞り込みの結果、該当する項目が見つかりませんでした。</p>
+                    <p>カテゴリ、製品、店舗の名称で検索するには、それぞれの一覧画面に切り替えてください。</p>
+                    <p>さらに、左端の価格一覧ボタンを押すと、該当の価格を一覧できます。</p>
+                </MudText>
+            </MudPaper>
+            <MudSpacer />
+        </MudStack>
+    } else {
+        <MudTable Items="items" Dense Breakpoint="Breakpoint.Xs" @ref="_table"
+        Filter="new Func<Price, bool> (FilterFunc)"
+        SortLabel="⇅"
+        AllowUnsorted="true"
+        @bind-SelectedItem="selectedItem"
+        CommitEditTooltip="保存"
+        CancelEditTooltip="取消"
+        RowEditPreview="Edit"
+        RowEditCancel="Cancel"
+        RowEditCommit="Commit"
+        FooterClass="mud-background-gray"
+        Striped="@(!AllowGrouping)"
+        GroupBy="@(AllowGrouping ? groupDefinition : null)"
+        GroupHeaderStyle="background-color:var(--mud-palette-background-gray);"
+        ReadOnly="false"
+        CanCancelEdit="true"
+        IsEditRowSwitchingBlocked="true"
+        ApplyButtonPosition="TableApplyButtonPosition.End"
+        EditButtonPosition="TableEditButtonPosition.End"
+        EditTrigger="TableEditTrigger.EditButton">
+            <HeaderContent>
+                @{ CheckPageChangedAndCollapse (); }
+                <MudTh>@(Price.Label [nameof (Price.Category)])</MudTh>
+                <MudTh>@(Price.Label [nameof (Price.ProductId)])</MudTh>
+                <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
+                <MudTh Class="align-right" Style="width: 9em;">
+                    @(Price.Label [nameof (Price.PriceWithTax)])
+                    <MudButton Disabled="AppLockState.IsLocked" OnClick="ChangeTaxModeAsync" Style="min-width: 3em;" Size="Size.Small">
+                        (<MudText Color="@(IsTaxExcluded == true ? Color.Warning : Color.Success)" Typo="Typo.inherit">@(IsTaxExcluded == true ? "税抜" : "税込")</MudText>)
+                    </MudButton>
+                </MudTh>
+                <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.Quantity)])</MudTh>
+                <MudTh Class="align-right" Style="width: 7em;">@(Price.Label [nameof (Price.UnitPrice)])</MudTh>
+                <MudTh>@(Price.Label [nameof (Price.Remarks)])</MudTh>
+                @if (!AllowGrouping) {
+                    lastCategoryId = lastProductId = lastStoreId = 0;
+                }
+            </HeaderContent>
+            <GroupHeaderTemplate>
+                @{
+                    var price = context.Items.First ();
+                    var (category, product, store) = GetRelations (price);
+                }
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(category?.Name)</MudTd>
+                <MudTd Class="py-0" DataLabel="@(Price.Label[nameof(Price.ProductId)])">
+                    <MudStack Row Spacing="1" Class="align-center">
+                        <MudTooltip Text="@(product?.Remarks)" Duration="1000">
+                            @(product?.Name)
+                        </MudTooltip>
+                        <MudSpacer />
+                        @if (product?.Image is not null) {
+                            <MudTooltip Color="Color.Transparent" Duration="1000">
+                                <ChildContent>
+                                    <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                </ChildContent>
+                                <TooltipContent>
+                                    <MudImage Elevation="5" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                </TooltipContent>
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                <MudTd Class="align-right text-nowrap" Style="@(price.TooOld > 0 || price.Confirmed is null ? "color:var(--mud-palette-action-default);" : "")" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(IsTaxExcluded == true ? "抜" : "込")})")">
+                    @(price.PriceWithTax is null ? "未記入" : $"¥{(IsTaxExcluded == true ? price.PriceWithoutTax : price.PriceWithTax):#,0}")
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
+                    @(price.Quantity is null ? "未記入" : $"{price.Quantity:#,0}{product?.Unit}")
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" Style="@(price.TooOld > 0 || price.Confirmed is null ? "color:var(--mud-palette-action-default);" : "")" DataLabel="@(Price.Label [nameof (Price.UnitPrice)])">
+                    @($"¥{price.UnitPrice:#,0.00}")
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@(price.Remarks)</MudTd>
+            </GroupHeaderTemplate>
+            <GroupFooterTemplate>
+                @{  // 価格の新規追加で事前入力を行わないのは、ここがグループフッターで表中に複数回出現するため (`newItem`はひとつしかない)
+                    var price = context.Items.First ();
+                    var filterText = $"p{price.ProductId}.";
+                }
+                <MudTd colspan="7" Class="pr-0">
+                    <MudStack Row>
+                        <MudSpacer />
+                        <MudTooltip Text="この製品で絞り込み" Duration="1000">
+                            <MudIconButton Disabled="@(FilterText == filterText)" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" />
+                        </MudTooltip>
+                        <MudTooltip Text="この製品の価格を追加" Duration="1000">
+                            <MudIconButton Disabled="isAdding" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" />
+                        </MudTooltip>
+                    </MudStack>
+                </MudTd>
+            </GroupFooterTemplate>
+            <RowTemplate>
+                @{
+                    var (category, product, store) = GetRelations (context);
+                    var old = context.TooOld > 0 || context.Confirmed is null;
+                }
+                @if (AllowGrouping) {
+                    <MudHidden Breakpoint="Breakpoint.Xs">
+                        <MudTd />
+                        <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
+                            <MudTooltip>
+                                <ChildContent>
+                                    <MudText Typo="Typo.body2" Style="@($"color:var(--mud-palette-action-{(old ? "disabled" : "default")});;")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
+                                </ChildContent>
+                                <TooltipContent>
+                                    <MudText Typo="Typo.inherit" Align="Align.Left">
+                                        <p>@(Price.Label [nameof (Price.Modified)]): @(context.Modified.ToString ())</p>
+                                        <p>@(Price.Label [nameof (Price.Created)]): @(context.Created.ToString ())</p>
+                                    </MudText>
+                                </TooltipContent>
+                            </MudTooltip>
+                        </MudTd>
+                    </MudHidden>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(store?.Name)</MudTd>
+                } else {
+                    var newCategory = lastCategoryId != category?.Id;
+                    var newProduct = lastProductId != product?.Id;
+                    var newStore = lastStoreId != store?.Id;
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.Category)])">@(newCategory ? category?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.ProductId)])">@(newProduct ? product?.Name : "")</MudTd>
+                    <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">@(newStore || newProduct ? store?.Name : "")</MudTd>
+                    lastCategoryId = category?.Id ?? 0;
+                    lastProductId = product?.Id ?? 0;
+                    lastStoreId = store?.Id ?? 0;
+                }
+                <MudTd Class="align-right text-nowrap" DataLabel="@($"{Price.Label[nameof(Price.PriceWithTax)]}(税{(IsTaxExcluded == true ? "抜" : "込")})")">
+                    @(context.PriceWithTax is null ? "未記入" : $"¥{(IsTaxExcluded == true ? context.PriceWithoutTax : context.PriceWithTax):#,0}")
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Quantity)])">
+                    @(context.Quantity is null ? "未記入" : $"{context.Quantity:#,0}{product?.Unit}")
+                </MudTd>
+                <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.UnitPrice)])">
+                    @(context.UnitPrice is null ? "" : $"¥{context.UnitPrice:#,0.00}")
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">@context.Remarks</MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                @{ var (category, product, store) = GetRelations (context); }
+                <MudTd>
+                    <MudStack Row>
+                        <MudSpacer />
+                        @{ var disable = context.ReferenceCount (DataSet) > 0; }
+                        <MudTooltip Text="@(disable ? "最後につき削除不可" : "この価格を削除")" Duration="1000">
+                            <MudIconButton Disabled="@(disable)" OnClick="() => DeleteItem (context)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" />
+                        </MudTooltip>
+                    </MudStack>
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
+                    <MudDatePicker Label="@(Price.Label[nameof(Price.Confirmed)])" Clearable Margin="0" @bind-Date="context.Confirmed" />
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.StoreId)])">
+                    <MudSelect Typo="Typo.body2" T="long" Clearable="false" @bind-Value="context.StoreId">
+                        @foreach (var store in DataSet.Stores) {
+                            <MudSelectItem Value="store.Id">@(store.Name)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.PriceWithTax)])">
+                    @if (IsTaxExcluded == true) {
+                        <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithoutTax" />
+                    } else {
+                        <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.CurrencyYen" IconSize="Size.Small" @bind-Value="context.PriceWithTax" />
+                    }
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Quantity)])">
+                    @* Todo: `AdornmentText`のサイズが、`Typo`の設定に従わない *@
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="float?" Adornment="Adornment.End" AdornmentText="@(product?.Unit)" Validation="@(new Func<float?, IEnumerable<string>>(QuantityValidation))" @bind-Value="context.Quantity" />
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.TaxRate)])">
+                    <MudNumericField Typo="Typo.body2" T="int" Min="0" Max="100" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Percent" IconSize="Size.Small" @bind-value="context.TaxPercentage" />
+                </MudTd>
+                <MudTd DataLabel="@(Price.Label[nameof(Price.Remarks)])">
+                    <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Remarks" />
+                </MudTd>
+            </RowEditingTemplate>
+            <FooterContent>
+                <MudTd colspan="7">
+                    <MudStack Row Class="align-center justify-center">
+                        <MudCheckBox Size="Size.Small" @bind-Value="AllowGrouping"><MudText Typo="Typo.body2" Class="mr-3" Style="margin-left: -8px;">グループ</MudText></MudCheckBox>
+                        <MudDivider Vertical="true" FlexItem="true" />
+                        <MudStack Row Spacing="2" Class="align-center">
+                            <MudText Typo="Typo.body2" Color="Color.Success">税込</MudText>
+                            <MudSwitch T="bool" Color="Color.Warning" UncheckedColor="Color.Success" Style="margin-right:-5px;" @bind-Value="_isTaxExcluded" />
+                            <MudText Typo="Typo.body2" Color="Color.Warning">税抜</MudText>
+                        </MudStack>
+                    </MudStack>
+                </MudTd>
+            </FooterContent>
+            <PagerContent>
+                @if (AllowPaging) {
+                    <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+                }
+            </PagerContent>
+            <EditButtonContent Context="button">
+                <MudTooltip Text="編集" Duration="1000">
+                    <MudIconButton Disabled="button.ButtonDisabled" OnClick="button.ButtonAction" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" />
+                </MudTooltip>
+            </EditButtonContent>
+        </MudTable>
+        <MudText Class="mt-2" Typo="Typo.body2" Color="Color.Success">@(DataSet.Valid ? "validated" : "")</MudText>
+        <MudToolBar Dense Class="mb-2">
+            @*hidden spacer*@
+        </MudToolBar>
+    }
+} else {
+    <MudText>No items found.</MudText>
+}
+
+@code{
+
+    /// <summary>外税</summary>
+    [CascadingParameter (Name = "TaxExcluded")] protected bool? IsTaxExcluded { get; set; }
+
+    /// <summary>外税の設定</summary>
+    [CascadingParameter (Name = "SetTaxExcluded")] protected EventCallback<bool> SetTaxExcluded { get; set; }
+
+    /// <summary>外税 スイッチの値</summary>
+    protected bool _isTaxExcluded;
+
+    /// <summary>直上の行との比較用</summary>
+    protected long lastCategoryId;
+
+    /// <summary>直上の行との比較用</summary>
+    protected long lastProductId;
+
+    /// <summary>直上の行との比較用</summary>
+    protected long lastStoreId;
+
+    /// <summary>ページの変化検出用</summary>
+    protected int lastPage;
+
+    /// <inheritdoc/>
+    protected override int _initialPageSizeIndex => AllowGrouping ? 6 : 1;
+
+    /// <summary>ページの変化を検出</summary>
+    protected void CheckPageChangedAndCollapse () {
+        if (_table != null && lastPage != _table.CurrentPage) {
+            // グループをたたむ
+            _table.CollapseAllGroups ();
+            // 編集を終える
+            _table.SetEditingItem (null);
+            lastPage = _table.CurrentPage;
+        }
+    }
+
+    /// <summary>グループ表示</summary>
+    protected bool AllowGrouping {
+        get => _allowGrouping;
+        set {
+            _allowGrouping = value;
+            InitRowsPerPage ();
+            StateHasChanged();
+        }
+    }
+    private bool _allowGrouping = true;
+
+    /// <summary>行グループ</summary>
+    protected TableGroupDefinition<Price> groupDefinition = new () {
+        GroupName = "Product",
+        Indentation = false,
+        Expandable = true,
+        IsInitiallyExpanded = false,
+        Selector = i => i.ProductId
+    };
+
+    /// 同じ製品の価格を追加
+    protected async Task AddSameItem (long productId, long storeId) {
+        newItem = new (DataSet, productId, storeId);
+        await base.AddItem ();
+    }
+
+    /// <summary>Quantityの検証</summary>
+    protected IEnumerable<string> QuantityValidation (float? quantity) {
+        if (quantity <= 0) {
+            yield return $"{Price.Label [nameof (Price.Quantity)]} > 0";
+        }
+    }
+
+    /// <summary>行毎の関係値を取得</summary>
+    private (Category? category, Product? product, Store? Store) GetRelations (Price context) {
+        var category = context.Category (DataSet);
+        var product = context.Product (DataSet);
+        var store = context.Store (DataSet);
+        return (category, product, store);
+    }
+
+    /// <summary>編集で単価が有効になったら確認日時を設定</summary>
+    /// <remarks>
+    ///  未確認に単価が記入されると現在日時が補間される
+    ///  確認済みの日時が消されると単価があっても未確認に戻る
+    ///  単価のある未確認を編集・保存すると現在日時が補間される
+    ///  単価を喪失すると未確認になる
+    ///  //</remarks>
+    protected override void Commit (object obj) {
+        var item = GetT (obj);
+        if (item.UnitPrice != null && item.Confirmed == null && backupedItem.Confirmed == null) {
+            item.Confirmed = DateTime.Now;
+        } else if (item.UnitPrice == null && item.Confirmed != null) {
+            item.Confirmed = null;
+        }
+        base.Commit (obj);
+    }
+
+    /// <summary>パラメータに変更があった (検索条件が変化した可能性)</summary>
+    protected override void OnParametersSet () {
+        base.OnParametersSet ();
+        // グループをたたむ
+        _table?.CollapseAllGroups ();
+    }
+
+    /// <summary>税モードの反転</summary>
+    protected async Task ChangeTaxModeAsync () {
+        if (IsTaxExcluded is not null) {
+            _isTaxExcluded = IsTaxExcluded != true;
+            await SetTaxExcluded.InvokeAsync (_isTaxExcluded);
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync (bool firstRender) {
+        await base.OnAfterRenderAsync (firstRender);
+        if (!_inited && AppLockState.IsLocked && items?.Count > 0) {
+            _inited = true;
+            AppLockState.Unlock ();
+        }
+        if (IsTaxExcluded is not null) {
+            if (!_taxInited) {
+                // スイッチを初期化
+                if (_isTaxExcluded != IsTaxExcluded.Value) {
+                    _isTaxExcluded = IsTaxExcluded.Value;
+                    StateHasChanged ();
+                }
+                _taxInited = true;
+            } else if (IsTaxExcluded.Value != _isTaxExcluded) {
+                // スイッチの変化を反映
+                await SetTaxExcluded.InvokeAsync (_isTaxExcluded);
+            }
+        }
+    }
+    protected bool _taxInited;
+    protected bool _inited = false;
+
+}

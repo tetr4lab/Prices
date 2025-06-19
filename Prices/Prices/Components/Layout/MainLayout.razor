@@ -5,6 +5,7 @@
 @implements IDisposable
 @inject ProtectedLocalStorage Storage
 @inject NavigationManager Navi
+@inject AppLockState AppLock
 
 <PageTitle>Prices</PageTitle>
 
@@ -44,15 +45,15 @@
                 </MudStack>
                 <article class="content px-4">
                     <CascadingValue Value="@_filterText" Name="Filter">
-                        <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetFilterText))" Name="SetFilter">
-                            <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetSectionTitle))" Name="Section">
-                                <CascadingValue Value="@_isTaxExcluded" Name="TaxExcluded">
-                                    <CascadingValue Value="@(EventCallback.Factory.Create<bool> (this, SetTaxExcludedAsync))" Name="SetTaxExcluded">
-                                        @Body
-                                    </CascadingValue>
-                                </CascadingValue>
+                    <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetFilterText))" Name="SetFilter">
+                        <CascadingValue Value="@(EventCallback.Factory.Create<string> (this, SetSectionTitle))" Name="Section">
+                            <CascadingValue Value="@_isTaxExcluded" Name="TaxExcluded">
+                            <CascadingValue Value="@(EventCallback.Factory.Create<bool> (this, SetTaxExcludedAsync))" Name="SetTaxExcluded">
+                                @Body
+                            </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>
+                    </CascadingValue>
                     </CascadingValue>
                 </article>
             </main>
@@ -73,8 +74,6 @@
 <MudSnackbarProvider />
 
 @code {
-    [CascadingParameter] public AppLockState AppLock { get; set; } = null!;
-
     /// <summary>テーマ ストレージキー</summary>
     protected const string DarkModeStorageKey = "IsDarkTheme";
 
@@ -135,22 +134,18 @@
         _drawerOpen = false;
     }
 
-    /// <summary>変化を購読</summary>
+    /// <summary>アプリロックが変化した</summary>
     protected void OnAppLockPropertyChanged (object? sender, PropertyChangedEventArgs e) {
         InvokeAsync (StateHasChanged);
     }
 
     /// <summary>初期化 購読開始</summary>
     protected override void OnInitialized () {
-        if (AppLock != null) {
-            AppLock.PropertyChanged += OnAppLockPropertyChanged;
-        }
+        AppLock.PropertyChanged += OnAppLockPropertyChanged;
     }
 
     /// <summary>購読終了</summary>
     public void Dispose () {
-        if (AppLock != null) {
-            AppLock.PropertyChanged -= OnAppLockPropertyChanged;
-        }
+        AppLock.PropertyChanged -= OnAppLockPropertyChanged;
     }
 }

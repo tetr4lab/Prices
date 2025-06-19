@@ -6,6 +6,7 @@ using Prices.Components;
 using Prices.Services;
 using Tetr4lab;
 using System.Globalization;
+using Prices.Components.Pages;
 
 var builder = WebApplication.CreateBuilder (args);
 var connectionString = $"database=prices;{builder.Configuration.GetConnectionString ("Host")}{builder.Configuration.GetConnectionString ("Account")}Allow User Variables=true;";
@@ -48,8 +49,11 @@ await builder.Services.AddAuthorizationAsync (
 builder.Services.AddCascadingAuthenticationState ();
 #endif
 
-// UIロックを管理できるように
-builder.Services.AddCascadingValue (_ => new AppLockState ());
+// UIロック状態
+builder.Services.AddScoped<AppLockState> ();
+
+// アプリモード
+builder.Services.AddScoped<AppModeManager> ();
 
 // 回路の閉鎖を検出するCircuitHandlerをセッション毎に使う
 builder.Services.AddScoped<CircuitHandler, CircuitClosureDetector> ();
