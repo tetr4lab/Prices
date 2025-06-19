@@ -48,6 +48,9 @@ await builder.Services.AddAuthorizationAsync (
 builder.Services.AddCascadingAuthenticationState ();
 #endif
 
+// UIロックを管理できるように
+builder.Services.AddCascadingValue (_ => new AppLockState ());
+
 // 回路の閉鎖を検出するCircuitHandlerをセッション毎に使う
 builder.Services.AddScoped<CircuitHandler, CircuitClosureDetector> ();
 

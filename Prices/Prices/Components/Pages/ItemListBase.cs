@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Prices.Components.Pages;
 
-public class ItemListBase<T> : ComponentBase, IDisposable where T : PricesBaseModel<T>, IPricesBaseModel, new() {
+public class ItemListBase<T> : PricesComponentBase, IDisposable where T : PricesBaseModel<T>, IPricesBaseModel, new() {
 
     /// <summary>ページング機能の有効性</summary>
     protected const bool AllowPaging = true;

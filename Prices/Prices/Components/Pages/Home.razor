@@ -49,7 +49,7 @@
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
                     @(Price.Label [nameof (Price.PriceWithTax)])
-                    <MudButton Style="min-width: 3em;" Size="Size.Small" OnClick="ChangeTaxModeAsync">
+                    <MudButton Disabled="AppLock.IsLocked" OnClick="ChangeTaxModeAsync" Style="min-width: 3em;" Size="Size.Small">
                         (<MudText Color="@(IsTaxExcluded == true ? Color.Warning : Color.Success)" Typo="Typo.inherit">@(IsTaxExcluded == true ? "税抜" : "税込")</MudText>)
                     </MudButton>
                 </MudTh>
@@ -105,10 +105,10 @@
                     <MudStack Row>
                         <MudSpacer />
                         <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Disabled="@(FilterText == filterText)" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" />
+                            <MudIconButton Disabled="@(FilterText == filterText)" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" />
                         </MudTooltip>
                         <MudTooltip Text="この製品の価格を追加" Duration="1000">
-                            <MudIconButton Disabled="isAdding" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" />
+                            <MudIconButton Disabled="isAdding" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" />
                         </MudTooltip>
                     </MudStack>
                 </MudTd>
@@ -165,7 +165,7 @@
                         <MudSpacer />
                         @{ var disable = context.ReferenceCount (DataSet) > 0; }
                         <MudTooltip Text="@(disable ? "最後につき削除不可" : "この価格を削除")" Duration="1000">
-                            <MudIconButton Disabled="@(disable)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" OnClick="() => DeleteItem (context)" />
+                            <MudIconButton Disabled="@(disable)" OnClick="() => DeleteItem (context)" Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" Class="pa-0" />
                         </MudTooltip>
                     </MudStack>
                 </MudTd>
@@ -217,7 +217,7 @@
             </PagerContent>
             <EditButtonContent Context="button">
                 <MudTooltip Text="編集" Duration="1000">
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+                    <MudIconButton Disabled="button.ButtonDisabled" OnClick="button.ButtonAction" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" />
                 </MudTooltip>
             </EditButtonContent>
         </MudTable>

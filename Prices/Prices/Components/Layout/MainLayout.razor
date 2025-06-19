@@ -1,8 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
-@inject ProtectedLocalStorage Storage
-@inject NavigationManager Navi
+@using System.ComponentModel;
 
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject ProtectedLocalStorage Storage
+@inject NavigationManager Navi
 
 <PageTitle>Prices</PageTitle>
 
@@ -64,12 +66,15 @@
         </NotAuthorized>
     </AuthorizeView>
 </div>
+<Overlay IsOverlayed="AppLock.IsLocked" OverlayValue="AppLock.CurrentProgressValue" OverlayMin="0" OverlayMax="AppLock.TotalProgressValue" OverlayLabel="@AppLock.Reason" />
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 @code {
+    [CascadingParameter] public AppLockState AppLock { get; set; } = null!;
+
     /// <summary>テーマ ストレージキー</summary>
     protected const string DarkModeStorageKey = "IsDarkTheme";
 
@@ -128,5 +133,24 @@
     protected void SetFilterText (string text) {
         _filterText = text;
         _drawerOpen = false;
+    }
+
+    /// <summary>変化を購読</summary>
+    protected void OnAppLockPropertyChanged (object? sender, PropertyChangedEventArgs e) {
+        InvokeAsync (StateHasChanged);
+    }
+
+    /// <summary>初期化 購読開始</summary>
+    protected override void OnInitialized () {
+        if (AppLock != null) {
+            AppLock.PropertyChanged += OnAppLockPropertyChanged;
+        }
+    }
+
+    /// <summary>購読終了</summary>
+    public void Dispose () {
+        if (AppLock != null) {
+            AppLock.PropertyChanged -= OnAppLockPropertyChanged;
+        }
     }
 }
