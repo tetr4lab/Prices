@@ -13,8 +13,17 @@ public enum AppMode {
     Categories,
 }
 
-/// <summary>アプリモード管理</summary>
-public class AppModeController : INotifyPropertyChanged {
+/// <summary>アプリモード管理の雛形</summary>
+public interface IAppModeController {
+    event PropertyChangedEventHandler? PropertyChanged;
+    AppMode CurrentMode { get; }
+    AppMode RequestedMode { get; }
+    void SetMode (AppMode mode);
+    void SetRequestedMode (AppMode mode);
+}
+
+    /// <summary>アプリモード管理</summary>
+    public class AppModeController : IAppModeController, INotifyPropertyChanged {
     /// <summary>プロパティの変更を通知するイベント</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -47,11 +56,15 @@ public class AppModeController : INotifyPropertyChanged {
         }
     }
     protected AppMode _requestedMode = AppMode.None;
- 
+
     /// <summary>モードを設定</summary>
-    public void SetMode (AppMode mode) => CurrentMode = mode;
+    public void SetMode (AppMode mode) {
+        CurrentMode = mode;
+    }
 
     /// <summary>モードをリクエスト</summary>
-    public void SetRequestedMode (AppMode mode) => RequestedMode = mode;
+    public void SetRequestedMode (AppMode mode) {
+        RequestedMode = mode;
+    }
 }
 

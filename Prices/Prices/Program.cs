@@ -53,7 +53,7 @@ builder.Services.AddCascadingAuthenticationState ();
 builder.Services.AddScoped<AppLockState> ();
 
 // アプリモード
-builder.Services.AddScoped<AppModeController> ();
+builder.Services.AddScoped<IAppModeController, AppModeController> ();
 
 // 回路の閉鎖を検出するCircuitHandlerをセッション毎に使う
 builder.Services.AddScoped<CircuitHandler, CircuitClosureDetector> ();
