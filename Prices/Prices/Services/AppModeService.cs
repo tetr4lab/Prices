@@ -13,7 +13,7 @@ public enum AppMode {
     Categories,
 }
 
-/// <summary>アプリモード管理の雛形</summary>
+/// <summary>アプリモード管理</summary>
 public interface IAppModeService {
     event PropertyChangedEventHandler? PropertyChanged;
     AppMode CurrentMode { get; }
@@ -23,7 +23,7 @@ public interface IAppModeService {
 }
 
     /// <summary>アプリモード管理</summary>
-    public class AppModeService : IAppModeService, INotifyPropertyChanged {
+public class AppModeService : IAppModeService, INotifyPropertyChanged {
     /// <summary>プロパティの変更を通知するイベント</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
