@@ -34,7 +34,7 @@
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Store.Label[nameof(Store.Priority)])">
                     <MudStack Row>
                         <MudTooltip Text="価格を一覧" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"s{context.Id}."); AppModeService.SetMode (AppMode.Prices); })" />
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(async () => await FilterAndNavigate (context, 's', AppMode.Prices))" />
                         </MudTooltip>
                         <MudSpacer />
                         @context.Priority
@@ -63,7 +63,7 @@
             <FooterContent>
                 <MudTd>
                     <MudTooltip Text="全ての価格を一覧" Duration="1000">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", AppMode.Prices))" />
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ('p', AppMode.Prices))" />
                     </MudTooltip>
                 </MudTd>
                 <MudTd>

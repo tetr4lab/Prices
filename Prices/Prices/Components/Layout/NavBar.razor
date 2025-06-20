@@ -14,23 +14,23 @@
 </style>
 @if (!IsHomePage) {
     <MudItem>
-        <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Prices)" OnClick="@(() => AppModeService.SetMode (AppMode.Prices))" StartIcon="@Icons.Material.Filled.PriceChange" Class="mx-2" IconClass="mr-1">
+        <MudButton Disabled="AppModeService.CurrentMode == AppMode.Prices" OnClick="() => SetMode (AppMode.Prices)" StartIcon="@Icons.Material.Filled.PriceChange" Class="mx-2" IconClass="mr-1">
             <MudText Typo="Typo.h6">Prices</MudText>
         </MudButton>
     </MudItem>
 }
 <MudItem>
-    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Products)" OnClick="@(() => AppModeService.SetMode (AppMode.Products))" StartIcon="@Icons.Material.Filled.ShoppingBasket" Class="mx-2" IconClass="mr-1">
+    <MudButton Disabled="AppModeService.CurrentMode == AppMode.Products" OnClick="() => SetMode (AppMode.Products)" StartIcon="@Icons.Material.Filled.ShoppingBasket" Class="mx-2" IconClass="mr-1">
         <MudText Typo="Typo.h6">Products</MudText>
     </MudButton>
 </MudItem>
 <MudItem>
-    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Categories)" OnClick="@(() => AppModeService.SetMode (AppMode.Categories))" StartIcon="@Icons.Material.Filled.Category" Class="mx-2" IconClass="mr-1">
+    <MudButton Disabled="AppModeService.CurrentMode == AppMode.Categories" OnClick="() => SetMode (AppMode.Categories)" StartIcon="@Icons.Material.Filled.Category" Class="mx-2" IconClass="mr-1">
         <MudText Typo="Typo.h6">Categories</MudText>
     </MudButton>
 </MudItem>
 <MudItem>
-    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Stores)" OnClick="@(() => AppModeService.SetMode (AppMode.Stores))" StartIcon="@Icons.Material.Filled.Store" Class="mx-2" IconClass="mr-1">
+    <MudButton Disabled="AppModeService.CurrentMode == AppMode.Stores" OnClick="() => SetMode (AppMode.Stores)" StartIcon="@Icons.Material.Filled.Store" Class="mx-2" IconClass="mr-1">
         <MudText Typo="Typo.h6">Stores</MudText>
     </MudButton>
 </MudItem>
@@ -135,6 +135,12 @@
             OnClickSearchButton.InvokeAsync (_filterText);
             searchField.BlurAsync ();
         }
+    }
+
+    /// <summary>モード切替</summary>
+    protected void SetMode (AppMode mode) {
+        UiState.Lock ();
+        AppModeService.SetMode (mode);
     }
 
 }

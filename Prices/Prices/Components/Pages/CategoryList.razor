@@ -37,7 +37,7 @@
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Category.Label[nameof(Category.Priority)])">
                     <MudStack Row>
                         <MudTooltip Text="製品を一覧" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.ShoppingBasket" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"c{context.Id}."); AppModeService.SetMode (AppMode.Products); })" />
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.ShoppingBasket" Class="pa-0" OnClick="@(async () => await FilterAndNavigate (context, 'c', AppMode.Products))" />
                         </MudTooltip>
                         <MudSpacer />
                         @context.Priority
@@ -74,7 +74,7 @@
             <FooterContent>
                 <MudTd>
                     <MudTooltip Text="全ての製品を一覧" Duration="1000">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ShoppingBasket" Class="pa-0" OnClick="@(() => FilterAndNavigate ("c", AppMode.Products))" />
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ShoppingBasket" Class="pa-0" OnClick="@(() => FilterAndNavigate ('c', AppMode.Products))" />
                     </MudTooltip>
                 </MudTd>
                 <MudTd>

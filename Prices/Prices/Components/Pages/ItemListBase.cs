@@ -90,17 +90,23 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         await base.OnAfterRenderAsync (firstRender);
         if (firstRender) {
-            // 遅延初期化
-            await DataSet.InitializeAsync ();
-            StateHasChanged ();
+            _firstRendered = true;
         }
-        if (_table != null && !_isTableInitialized) {
-            // デフォルト項目数の設定
-            _isTableInitialized = true;
-            InitRowsPerPage ();
+        if (_firstRendered) {
+            if (_table != null && !_isTableInitialized) {
+                // デフォルト項目数の設定
+                _isTableInitialized = true;
+                InitRowsPerPage ();
+            }
+            if (!_initialUnlocked && UiState.IsLocked && items?.Count > 0) {
+                _initialUnlocked = true;
+                UiState.Unlock ();
+            }
         }
     }
+    protected bool _firstRendered;
     protected bool _isTableInitialized;
+    protected bool _initialUnlocked;
 
     /// <summary>ページ辺りの行数を初期化</summary>
     protected void InitRowsPerPage () {
@@ -281,9 +287,24 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     }
 
     //// <summary>表示されている全アイテムで絞りこんで次のページを表示</summary>
-    protected async Task FilterAndNavigate (string mark, AppMode mode) {
+    protected async Task FilterAndNavigate (char mark, AppMode mode) {
         if (_table != null) {
             var filter = string.Join ('|', _table.FilteredItems.ToList ().ConvertAll (context => $"{mark}{context.Id}."));
+            await FilterAndNavigate (filter, mode);
+        }
+    }
+
+    //// <summary>表示されている全アイテムで絞りこんで次のページを表示</summary>
+    protected async Task FilterAndNavigate (T context, char mark, AppMode mode) {
+        if (_table != null) {
+            await FilterAndNavigate ($"{mark}{context.Id}.", mode);
+        }
+    }
+
+    //// <summary>文字列で絞りこんで次のページを表示</summary>
+    protected async Task FilterAndNavigate (string filter, AppMode mode) {
+        if (_table != null) {
+            UiState.Lock ();
             await SetFilterText.InvokeAsync (filter);
             AppModeService.SetMode (mode);
         }
