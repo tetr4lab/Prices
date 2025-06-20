@@ -6,5 +6,5 @@ namespace Prices.Components.Pages;
 /// <summary>コンポーネント基底クラス</summary>
 public class PricesComponentBase : ComponentBase {
     [Inject] protected AppLockState AppLockState { get; set; } = null!;
-    [Inject] protected AppModeManager AppModeManager { get; set; } = null!;
+    [Inject] protected AppModeController AppModeManager { get; set; } = null!;
 }
