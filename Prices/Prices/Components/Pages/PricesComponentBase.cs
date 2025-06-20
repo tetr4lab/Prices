@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Prices.Services;
+using Tetr4lab;
 
 namespace Prices.Components.Pages;
 
