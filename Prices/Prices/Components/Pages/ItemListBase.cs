@@ -82,13 +82,13 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
             await DataSet.InitializeAsync ();
             StateHasChanged ();
         }
-        if (_table != null && !_inited) {
+        if (_table != null && !_isTableInitialized) {
             // デフォルト項目数の設定
-            _inited = true;
+            _isTableInitialized = true;
             InitRowsPerPage ();
         }
     }
-    protected bool _inited;
+    protected bool _isTableInitialized;
 
     /// <summary>ページ辺りの行数を初期化</summary>
     protected void InitRowsPerPage () {
