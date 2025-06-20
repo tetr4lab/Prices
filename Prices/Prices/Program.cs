@@ -50,7 +50,7 @@ builder.Services.AddCascadingAuthenticationState ();
 #endif
 
 // UIロック状態
-builder.Services.AddScoped<AppLockState> ();
+builder.Services.AddScoped<IAppLockState, AppLockState> ();
 
 // アプリモード
 builder.Services.AddScoped<IAppModeService, AppModeService> ();

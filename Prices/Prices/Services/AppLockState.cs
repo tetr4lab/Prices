@@ -4,7 +4,23 @@ using System.Runtime.CompilerServices;
 namespace Prices.Services;
 
 /// <summary>UIロックを管理する</summary>
-public class AppLockState : INotifyPropertyChanged {
+public interface IAppLockState {
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public bool IsLocked { get; }
+    public string Reason { get; }
+    public int TotalProgressValue { get; }
+    public int CurrentProgressValue { get; }
+    public void Lock (string reason, int totalProgressValue);
+    public void Lock (string reason);
+    public void Lock (int totalProgressValue);
+    public void Lock ();
+    public void Unlock ();
+    public void UpdateProgress (int value);
+    public double ProgressPercentage { get; }
+}
+
+/// <summary>UIロックを管理する</summary>
+public class AppLockState : IAppLockState, INotifyPropertyChanged {
     /// <summary>プロパティの変更を通知するイベント</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
