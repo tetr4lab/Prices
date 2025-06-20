@@ -3,32 +3,31 @@ using System.Runtime.CompilerServices;
 
 namespace Prices.Services;
 
-/// <summary>アプリのモード</summary>
-public enum AppMode {
-    None = -1,
-    Boot = 0,
-    Prices,
-    Products,
-    Stores,
-    Categories,
-}
-
 /// <summary>アプリモード管理</summary>
 /// <remarks><example>Program.cs でのサービス登録<code>
-/// builder.Services.AddScoped&lt;<see cref="IAppModeService"/>, <see cref="AppModeService"/>&gt; ();
+/// builder.Services.AddScoped&lt;<see cref="IAppModeService&lt;TEnum&gt;"/>, <see cref="AppModeService&lt;TEnum&gt;"/>&gt; ();
 /// </code></example></remarks>
-public interface IAppModeService {
+public interface IAppModeService<TEnum> where TEnum : Enum {
     /// <summary>プロパティの変更を通知するイベント</summary>
     /// <remarks><example>使用例<code>
+    /// // アプリのモード
+    /// public enum AppMode {
+    ///     None = AppModeService&lt;AppMode&gt;.NoneMode,
+    ///     Boot = AppModeService&lt;AppMode&gt;.DefaultMode,
+    ///     List,
+    ///     Detail,
+    ///     Settings,
+    /// }
+    /// </code><code>
     /// @implements IDisposable
-    /// @inject IAppModeService AppModeService
+    /// @inject IAppModeService&lt;AppMode&gt; AppModeService
     /// @code {
     ///     // イベントハンドラ
     ///     protected void OnAppModePropertyChanged (object? sender, PropertyChangedEventArgs e) {
     ///         if (e.PropertyName == &quot;CurrentMode&quot;) {
     ///             InvokeAsync (StateHasChanged); // モード変更による再描画
     ///         }
-    ///         if (e.PropertyName == &quot;RequestedMode&quot; &amp;&amp; sender is IAppModeService service) {
+    ///         if (e.PropertyName == &quot;RequestedMode&quot; &amp;&amp; sender is IAppModeService&lt;AppMode&gt; service) {
     ///             if (service.RequestedMode != AppMode.None &amp;&amp; service.RequestedMode != service.CurrentMode) {
     ///                 if (true /*or 可否判断*/) {
     ///                     service.SetMode (service.RequestedMode); // モード変更要求を受け付けて実際に変更
@@ -48,19 +47,26 @@ public interface IAppModeService {
     /// </code></example></remarks>
     event PropertyChangedEventHandler? PropertyChanged;
     /// <summary>現在のモード</summary>
-    AppMode CurrentMode { get; }
+    TEnum CurrentMode { get; }
     /// <summary>要求されたモード</summary>
     /// <remarks>See: <see cref="PropertyChanged"/></remarks>
-    AppMode RequestedMode { get; }
+    TEnum RequestedMode { get; }
     /// <summary>モードを設定</summary>
-    void SetMode (AppMode mode);
+    void SetMode (TEnum mode);
     /// <summary>モードを要求</summary>
     /// <remarks>See: <see cref="PropertyChanged"/></remarks>
-    void SetRequestedMode (AppMode mode);
+    void SetRequestedMode (TEnum mode);
 }
 
     /// <summary>アプリモード管理</summary>
-public class AppModeService : IAppModeService, INotifyPropertyChanged {
+public class AppModeService<TEnum> : IAppModeService<TEnum>, INotifyPropertyChanged where TEnum : Enum {
+
+    /// <summary>抹消番号</summary>
+    public const int NoneMode = -1;
+
+    /// <summary>初期番号</summary>
+    public const int DefaultMode = 0;
+
     /// <summary>プロパティの変更を通知するイベント</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -71,38 +77,38 @@ public class AppModeService : IAppModeService, INotifyPropertyChanged {
     }
 
     /// <summary>アプリのモード</summary>
-    public AppMode CurrentMode {
+    public TEnum CurrentMode {
         get => _currentMode;
         protected set {
-            if (_currentMode != value) {
+            if (!_currentMode.Equals (value)) {
                 _currentMode = value;
                 OnPropertyChanged ();
             }
         }
     }
-    protected AppMode _currentMode = AppMode.Boot;
+    protected TEnum _currentMode = (TEnum) (object) DefaultMode;
 
     /// <summary>リクエストされたアプリモード</summary>
-    public AppMode RequestedMode {
+    public TEnum RequestedMode {
         get => _requestedMode;
         protected set {
-            if (_requestedMode != value) {
+            if (!_requestedMode.Equals (value)) {
                 _requestedMode = value;
                 OnPropertyChanged ();
             }
         }
     }
-    protected AppMode _requestedMode = AppMode.None;
+    protected TEnum _requestedMode = (TEnum) (object) NoneMode;
 
     /// <summary>モードを設定</summary>
     /// <param name="mode">新しいモード</param>
-    public void SetMode (AppMode mode) {
+    public void SetMode (TEnum mode) {
         CurrentMode = mode;
     }
 
     /// <summary>モードをリクエスト</summary>
     /// <param name="mode">要求するモード</param>
-    public void SetRequestedMode (AppMode mode) {
+    public void SetRequestedMode (TEnum mode) {
         RequestedMode = mode;
     }
 }
