@@ -341,8 +341,8 @@
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         await base.OnAfterRenderAsync (firstRender);
-        if (!_inited && AppLockState.IsLocked && items?.Count > 0) {
-            _inited = true;
+        if (!_inited2 && AppLockState.IsLocked && items?.Count > 0) {
+            _inited2 = true;
             AppLockState.Unlock ();
         }
         if (IsTaxExcluded is not null) {
@@ -360,6 +360,6 @@
         }
     }
     protected bool _taxInited;
-    protected bool _inited = false;
+    protected bool _inited2 = false;
 
 }

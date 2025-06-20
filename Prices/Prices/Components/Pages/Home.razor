@@ -41,7 +41,7 @@
                 // DB初期化
                 await DataSet.InitializeAsync ();
                 await TaskEx.DelayUntil (() => DataSet.IsReady);
-                AppModeManager.CurrentMode = AppMode.Prices;
+                AppModeManager.SetMode (AppMode.Prices);
             }
             catch (Exception ex) {
                 System.Diagnostics.Debug.WriteLine (ex);
