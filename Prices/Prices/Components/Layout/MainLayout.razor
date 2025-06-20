@@ -24,7 +24,7 @@
                     </MudDrawer>
                 </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.Xs">
-                    <MudAppBar Color="Color.Transparent" Dense Fixed="true">
+                    <MudAppBar Color="Color.Transparent" Dense Fixed="true" Class="backdrop-blur">
                         <MudGrid Class="align-center flex-nowrap" Spacing="0">
                             <CascadingValue Value="@_filterText" Name="Filter">
                                 <NavBar OnClickSearchButton="SetFilterText" IsDarkMode="_isDarkMode" OnClickChangeModeButton="ChangeModeAsync" />

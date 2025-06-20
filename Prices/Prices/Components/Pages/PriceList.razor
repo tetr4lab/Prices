@@ -71,12 +71,12 @@
                         </MudTooltip>
                         <MudSpacer />
                         @if (product?.Image is not null) {
-                            <MudTooltip Color="Color.Transparent" Duration="1000">
+                            <MudTooltip Color="Color.Transparent" Duration="1000" Delay="1000">
                                 <ChildContent>
                                     <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
                                 </ChildContent>
                                 <TooltipContent>
-                                    <MudImage Elevation="5" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                    <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
                                 </TooltipContent>
                             </MudTooltip>
                         }
@@ -103,7 +103,7 @@
                     <MudStack Row>
                         <MudSpacer />
                         <MudTooltip Text="この製品で絞り込み" Duration="1000">
-                            <MudIconButton Disabled="@(FilterText == filterText)" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); NavManager.NavigateTo ("./"); })" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" />
+                            <MudIconButton Disabled="@(FilterText == filterText)" OnClick="@(async () => { await SetFilterText.InvokeAsync (filterText); AppModeService.SetMode (AppMode.Prices); })" Size="Size.Small" Icon="@Icons.Material.Outlined.FilterList" />
                         </MudTooltip>
                         <MudTooltip Text="この製品の価格を追加" Duration="1000">
                             <MudIconButton Disabled="isAdding" OnClick="() => AddSameItem (price.ProductId, price.StoreId)" Size="Size.Small" Icon="@Icons.Material.Outlined.Add" />
@@ -122,7 +122,7 @@
                         <MudTd Class="align-right text-nowrap" DataLabel="@(Price.Label[nameof(Price.Confirmed)])">
                             <MudTooltip>
                                 <ChildContent>
-                                    <MudText Typo="Typo.body2" Style="@($"color:var(--mud-palette-action-{(old ? "disabled" : "default")});;")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
+                                    <MudText Typo="Typo.body2" Style="@($"color: var(--mud-palette-action-{(old ? "disabled" : "default")});;")">@(context.Confirmed?.ToShortDateWithDayOfWeekString () ?? "未確認")</MudText>
                                 </ChildContent>
                                 <TooltipContent>
                                     <MudText Typo="Typo.inherit" Align="Align.Left">

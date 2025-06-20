@@ -5,6 +5,7 @@ using MudBlazor;
 using Tetr4lab;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel;
 
 namespace Prices.Components.Pages;
 
@@ -49,10 +50,19 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     /// <summary>ユーザ識別子</summary>
     protected string UserIdentifier => Identity?.Identifier ?? "unknown";
 
+    /// <summary>アプリモードが変化した</summary>
+    protected void OnAppModePropertyChanged (object? sender, PropertyChangedEventArgs e) {
+        if (e.PropertyName == "CurrentMode") {
+            InvokeAsync (StateHasChanged); // モード変更による再描画
+        }
+    }
+
     /// <summary>初期化</summary>
     protected override async Task OnInitializedAsync () {
         await base.OnInitializedAsync ();
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
+        // 購読開始
+        AppModeService.PropertyChanged += OnAppModePropertyChanged;
         // 認証・認可
         Identity = await AuthState.GetIdentityAsync ();
         newItem = NewEditItem;
@@ -60,6 +70,8 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
 
     /// <summary>破棄</summary>
     public void Dispose () {
+        // 購読終了
+        AppModeService.PropertyChanged -= OnAppModePropertyChanged;
         if (editingItem != null) {
             Cancel (editingItem);
         }
@@ -269,11 +281,11 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     }
 
     //// <summary>表示されている全アイテムで絞りこんで次のページを表示</summary>
-    protected async Task FilterAndNavigate (string mark, string uri) {
+    protected async Task FilterAndNavigate (string mark, AppMode mode) {
         if (_table != null) {
             var filter = string.Join ('|', _table.FilteredItems.ToList ().ConvertAll (context => $"{mark}{context.Id}."));
             await SetFilterText.InvokeAsync (filter);
-            NavManager.NavigateTo (uri);
+            AppModeService.SetMode (mode);
         }
     }
 

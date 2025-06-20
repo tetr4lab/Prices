@@ -7,35 +7,32 @@
         <MudText Class="pb-2" Typo="Typo.h4">Contents</MudText>
     }
 </MudItem>
+<style>
+    nav button[disabled] { background-color: var(--mud-palette-background-gray); }
+    nav button[disabled] .mud-icon-root { color: var(--mud-palette-primary); }
+    nav button[disabled] .mud-typography { color: var(--mud-palette-primary); }
+</style>
 @if (!IsHomePage) {
     <MudItem>
-        <MudNavLink Href="./" Match="NavLinkMatch.All">
-            <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-                <MudIcon Icon="@Icons.Material.Filled.PriceChange" />Prices
-            </MudText>
-        </MudNavLink>
+        <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Prices)" OnClick="@(() => AppModeService.SetMode (AppMode.Prices))" StartIcon="@Icons.Material.Filled.PriceChange" Class="mx-2" IconClass="mr-1">
+            <MudText Typo="Typo.h6">Prices</MudText>
+        </MudButton>
     </MudItem>
 }
 <MudItem>
-    <MudNavLink Href="products">
-        <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.ShoppingBasket" />Products
-        </MudText>
-    </MudNavLink>
+    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Products)" OnClick="@(() => AppModeService.SetMode (AppMode.Products))" StartIcon="@Icons.Material.Filled.ShoppingBasket" Class="mx-2" IconClass="mr-1">
+        <MudText Typo="Typo.h6">Products</MudText>
+    </MudButton>
 </MudItem>
 <MudItem>
-    <MudNavLink Href="categories">
-        <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.Category" />Categories
-        </MudText>
-    </MudNavLink>
+    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Categories)" OnClick="@(() => AppModeService.SetMode (AppMode.Categories))" StartIcon="@Icons.Material.Filled.Category" Class="mx-2" IconClass="mr-1">
+        <MudText Typo="Typo.h6">Categories</MudText>
+    </MudButton>
 </MudItem>
 <MudItem>
-    <MudNavLink Href="stores">
-        <MudText Class="d-flex align-center gap-1" Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.Store" />Stores
-        </MudText>
-    </MudNavLink>
+    <MudButton Disabled="@(AppModeService.CurrentMode == AppMode.Stores)" OnClick="@(() => AppModeService.SetMode (AppMode.Stores))" StartIcon="@Icons.Material.Filled.Store" Class="mx-2" IconClass="mr-1">
+        <MudText Typo="Typo.h6">Stores</MudText>
+    </MudButton>
 </MudItem>
 @if (!IsHomePage) {
     <MudSpacer />

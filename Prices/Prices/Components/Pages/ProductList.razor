@@ -1,7 +1,5 @@
 ﻿@inherits ItemListBase<Product>
 
-@page "/products"
-
 <PageTitle>Prices Products</PageTitle>
 
 @if (DataSet.IsUnavailable) {
@@ -39,7 +37,7 @@
                 <MudTd Class="align-right text-nowrap" DataLabel="@(Product.Label[nameof(Product.Priority)])">
                     <MudStack Row>
                         <MudTooltip Text="価格を一覧" Duration="1000">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.Id}."); NavManager.NavigateTo ("./"); })" />
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.PriceChange" Class="pa-0" OnClick="@(async () => { await SetFilterText.InvokeAsync ($"p{context.Id}."); AppModeService.SetMode (AppMode.Prices); })" />
                         </MudTooltip>
                         <MudSpacer />
                         @context.Priority
@@ -49,12 +47,12 @@
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Name)])">@(context.Name)</MudTd>
                 <MudTd Class="pa-0" Style="width:80px;" DataLabel="@(Product.Label[nameof(Product.Image)])">
                     @if (context.Image is not null) {
-                        <MudTooltip Color="Color.Transparent" Duration="1000">
+                        <MudTooltip Color="Color.Transparent" Duration="1000" Delay="1000">
                             <ChildContent>
                                 <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
                             </ChildContent>
                             <TooltipContent>
-                                <MudImage Elevation="5" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                                <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
                             </TooltipContent>
                         </MudTooltip>
                     }
@@ -108,7 +106,7 @@
             <FooterContent>
                 <MudTd>
                     <MudTooltip Text="全ての価格を一覧" Duration="1000">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", "./"))" />
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.PriceChange" Class="pa-0" OnClick="@(() => FilterAndNavigate ("p", AppMode.Prices))" />
                     </MudTooltip>
                 </MudTd>
                 <MudTd>
