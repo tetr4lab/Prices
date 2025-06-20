@@ -10,7 +10,7 @@
 
 <PageTitle>Prices</PageTitle>
 
-@switch (AppModeManager.CurrentMode) {
+@switch (AppModeService.CurrentMode) {
     case AppMode.Boot:
         if (!UiState.IsLocked) {
             UiState.Lock ("Loading...");
@@ -41,7 +41,7 @@
                 // DB初期化
                 await DataSet.InitializeAsync ();
                 await TaskEx.DelayUntil (() => DataSet.IsReady);
-                AppModeManager.SetMode (AppMode.Prices);
+                AppModeService.SetMode (AppMode.Prices);
             }
             catch (Exception ex) {
                 System.Diagnostics.Debug.WriteLine (ex);
@@ -67,13 +67,13 @@
     protected override async Task OnInitializedAsync () {
         await base.OnInitializedAsync ();
         // 購読開始
-        AppModeManager.PropertyChanged += OnAppModePropertyChanged;
+        AppModeService.PropertyChanged += OnAppModePropertyChanged;
         // 認証・認可
         Identity = await AuthState.GetIdentityAsync ();
     }
 
     /// <summary>購読終了</summary>
     public void Dispose () {
-        AppModeManager.PropertyChanged -= OnAppModePropertyChanged;
+        AppModeService.PropertyChanged -= OnAppModePropertyChanged;
     }
 }
