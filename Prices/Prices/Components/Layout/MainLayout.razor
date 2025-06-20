@@ -5,7 +5,7 @@
 @implements IDisposable
 @inject ProtectedLocalStorage Storage
 @inject NavigationManager Navi
-@inject IAppLockState AppLock
+@inject IAppLockState AppLockState
 
 <PageTitle>Prices</PageTitle>
 
@@ -67,7 +67,7 @@
         </NotAuthorized>
     </AuthorizeView>
 </div>
-<Overlay IsOverlayed="AppLock.IsLocked" OverlayValue="AppLock.CurrentProgressValue" OverlayMin="0" OverlayMax="AppLock.TotalProgressValue" OverlayLabel="@AppLock.Reason" />
+<Overlay IsOverlayed="AppLockState.IsLocked" OverlayValue="AppLockState.CurrentProgressValue" OverlayMin="0" OverlayMax="AppLockState.TotalProgressValue" OverlayLabel="@AppLockState.Reason" />
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -141,11 +141,11 @@
 
     /// <summary>初期化 購読開始</summary>
     protected override void OnInitialized () {
-        AppLock.PropertyChanged += OnAppLockPropertyChanged;
+        AppLockState.PropertyChanged += OnAppLockPropertyChanged;
     }
 
     /// <summary>購読終了</summary>
     public void Dispose () {
-        AppLock.PropertyChanged -= OnAppLockPropertyChanged;
+        AppLockState.PropertyChanged -= OnAppLockPropertyChanged;
     }
 }
