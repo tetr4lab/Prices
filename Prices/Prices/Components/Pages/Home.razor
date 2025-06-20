@@ -12,8 +12,8 @@
 
 @switch (AppModeManager.CurrentMode) {
     case AppMode.Boot:
-        if (!AppLockState.IsLocked) {
-            AppLockState.Lock ("Loading...");
+        if (!UiState.IsLocked) {
+            UiState.Lock ("Loading...");
         }
         break;
     case AppMode.Prices:

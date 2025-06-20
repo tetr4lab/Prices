@@ -47,7 +47,7 @@
                 <MudTh>@(Price.Label [nameof (Price.StoreId)])</MudTh>
                 <MudTh Class="align-right" Style="width: 9em;">
                     @(Price.Label [nameof (Price.PriceWithTax)])
-                    <MudButton Disabled="AppLockState.IsLocked" OnClick="ChangeTaxModeAsync" Style="min-width: 3em;" Size="Size.Small">
+                    <MudButton Disabled="UiState.IsLocked" OnClick="ChangeTaxModeAsync" Style="min-width: 3em;" Size="Size.Small">
                         (<MudText Color="@(IsTaxExcluded == true ? Color.Warning : Color.Success)" Typo="Typo.inherit">@(IsTaxExcluded == true ? "税抜" : "税込")</MudText>)
                     </MudButton>
                 </MudTh>
@@ -341,9 +341,9 @@
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         await base.OnAfterRenderAsync (firstRender);
-        if (!_initialUnlocked && AppLockState.IsLocked && items?.Count > 0) {
+        if (!_initialUnlocked && UiState.IsLocked && items?.Count > 0) {
             _initialUnlocked = true;
-            AppLockState.Unlock ();
+            UiState.Unlock ();
         }
         if (IsTaxExcluded is not null) {
             if (!_taxInited) {
