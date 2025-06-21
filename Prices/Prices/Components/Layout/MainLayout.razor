@@ -67,7 +67,7 @@
         </NotAuthorized>
     </AuthorizeView>
 </div>
-<Overlay IsOverlayed="AppLockState.IsLocked" OverlayValue="AppLockState.CurrentProgressValue" OverlayMin="0" OverlayMax="AppLockState.TotalProgressValue" OverlayLabel="@AppLockState.Reason" />
+<AppLockOverlay IsOverlayed="AppLockState.IsLocked" OverlayValue="AppLockState.CurrentProgressValue" OverlayMin="0" OverlayMax="AppLockState.TotalProgressValue" OverlayLabel="@AppLockState.Reason" />
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
