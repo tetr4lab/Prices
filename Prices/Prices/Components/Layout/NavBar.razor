@@ -49,9 +49,9 @@
                 <ChildContent>
                     <MudTextField @bind-Value="_filterText" @ref="searchField"
                     OnKeyUp="OnKeyUp"
-                    OnBlur="OnClick"
-                    OnAdornmentClick="OnClick" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
-                    OnClearButtonClick="OnClick" Clearable 
+                    OnBlur="OnClickAsync"
+                    OnAdornmentClick="OnClickAsync" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                    OnClearButtonClick="OnClearAsync" Clearable 
                     Label="Search" Margin="Margin.Dense" Variant="Variant.Outlined" Underline="false" />
                 </ChildContent>
                 <TooltipContent>
@@ -78,10 +78,10 @@
                 </TooltipContent>
             </MudTooltip>
             <MudTooltip Text="古い情報を除外" Duration="1000">
-                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FiberNew" OnClick="@(() => {
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FiberNew" OnClick="@(async () => {
                     var newText = $"=_not_old_";
                     _filterText = _filterText == newText ? "" : newText;
-                    OnClick ();
+                    await OnClickAsync ();
                 })" />
             </MudTooltip>
             @if (!OnClickChangeModeButton.Equals (EventCallback.Empty)) {
@@ -115,9 +115,9 @@
     private MudTextField<string> searchField { get; set; } = new MudTextField<string> ();
 
     /// <summary>検索フィールドでキーが押された</summary>
-    protected void OnKeyUp (KeyboardEventArgs eventArgs) {
+    protected async Task OnKeyUp (KeyboardEventArgs eventArgs) {
         if (eventArgs.Key == "Enter") {
-            OnClick ();
+            await OnClickAsync ();
         }
     }
 
@@ -129,18 +129,34 @@
         }
     }
 
-    /// <summary>検索ボタン(またはフィールドクリアボタン)が押された</summary>
-    public void OnClick () {
-        if (FilterText != _filterText) {
-            OnClickSearchButton.InvokeAsync (_filterText);
-            searchField.BlurAsync ();
-        }
-    }
-
     /// <summary>モード切替</summary>
     protected void SetMode (AppMode mode) {
         UiState.Lock ();
         AppModeService.SetMode (mode);
     }
 
+    /// <summary>フィールドクリアボタンが押された</summary>
+    public async Task OnClearAsync () {
+        await OnSearchAsync (string.Empty);
+    }
+
+    /// <summary>検索ボタンが押された</summary>
+    public async Task OnClickAsync () {
+        if (FilterText != _filterText) {
+            await OnSearchAsync (_filterText);
+        }
+    }
+
+    /// <summary>検索文字列の変更を実施</summary>
+    public async Task OnSearchAsync (string filter) {
+        if (_isFilterLocked) { return; }
+        _isFilterLocked = true;
+        UiState.Lock ();
+        await searchField.BlurAsync ();
+        await OnClickSearchButton.InvokeAsync (filter);
+        await TaskEx.DelayUntil (() => FilterText == filter);
+        UiState.Unlock ();
+        _isFilterLocked = false;
+    }
+    protected bool _isFilterLocked;
 }
