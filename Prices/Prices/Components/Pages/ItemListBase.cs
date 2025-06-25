@@ -32,9 +32,6 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     /// <summary>セクションラベル設定</summary>
     [CascadingParameter (Name = "Section")] protected EventCallback<string> SetSectionTitle { get; set; }
 
-    /// <summary>セッション数の更新</summary>
-    [CascadingParameter (Name = "Session")] protected EventCallback<int> UpdateSessionCount { get; set; }
-
     /// <summary>認証状況を得る</summary>
     [CascadingParameter] protected Task<AuthenticationState> AuthState { get; set; } = default!;
 
@@ -90,23 +87,13 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     protected override async Task OnAfterRenderAsync (bool firstRender) {
         await base.OnAfterRenderAsync (firstRender);
         if (firstRender) {
-            _firstRendered = true;
-        }
-        if (_firstRendered) {
-            if (_table != null && !_isTableInitialized) {
-                // デフォルト項目数の設定
-                _isTableInitialized = true;
-                InitRowsPerPage ();
-            }
-            if (!_initialUnlocked && UiState.IsLocked && items?.Count > 0) {
-                _initialUnlocked = true;
+            // デフォルト項目数の設定
+            InitRowsPerPage ();
+            if (UiState.IsLocked && items?.Count > 0) {
                 UiState.Unlock ();
             }
         }
     }
-    protected bool _firstRendered;
-    protected bool _isTableInitialized;
-    protected bool _initialUnlocked;
 
     /// <summary>ページ辺りの行数を初期化</summary>
     protected void InitRowsPerPage () {
