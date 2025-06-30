@@ -97,7 +97,9 @@
                 </MudTd>
             </FooterContent>
             <PagerContent>
-                <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+                @if (AllowPaging) {
+                    <MudTablePager PageSizeOptions="_pageSizeOptions" InfoFormat="{first_item}-{last_item} / {all_items}" RowsPerPageString="行/頁:" />
+                }
             </PagerContent>
             <EditButtonContent Context="button">
                 <MudTooltip Text="編集" Duration="1000">

@@ -12,7 +12,7 @@ namespace Prices.Components.Pages;
 public class ItemListBase<T> : PricesComponentBase, IDisposable where T : PricesBaseModel<T>, IPricesBaseModel, new() {
 
     /// <summary>ページング機能の有効性</summary>
-    protected const bool AllowPaging = true;
+    protected static readonly bool AllowPaging = false;
 
     /// <summary>列挙する最大数</summary>
     protected const int MaxListingNumber = int.MaxValue;
