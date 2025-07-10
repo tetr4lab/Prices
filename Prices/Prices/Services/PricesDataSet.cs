@@ -9,7 +9,7 @@ using Tetr4lab;
 namespace Prices.Services;
 
 /// <summary></summary>
-public sealed class PricesDataSet : BasicDataSet {
+public sealed class PricesDataSet : MySqlDataSet {
 
     /// <summary>コンストラクタ</summary>
     public PricesDataSet (Database database) : base (database) { }
