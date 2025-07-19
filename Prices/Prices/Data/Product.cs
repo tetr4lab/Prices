@@ -3,6 +3,7 @@ using PetaPoco;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using MudBlazor;
+using Tetr4lab;
 
 namespace Prices.Data;
 
@@ -35,6 +36,9 @@ public class Product : PricesBaseModel<Product>, IPricesBaseModel {
     [Column ("unit"), StringLength (50)] public string? Unit { get; set; }
     [Column ("priority")] public int? Priority { get; set; } = null;
     [Column ("image")] public byte []? Image { get; set; } = null;
+
+    /// <summary>埋め込み画像データ</summary>
+    public string ImageSource => Image.ToImageSource ();
 
     /// <summary>カテゴリ get</summary>
     public Category? Category (PricesDataSet dataSet) => dataSet.GetList<Category> ().Find (i => i.Id == CategoryId);

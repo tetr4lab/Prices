@@ -49,10 +49,10 @@
                     @if (context.Image is not null) {
                         <MudTooltip Color="Color.Transparent" Duration="1000" Delay="1000">
                             <ChildContent>
-                                <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                                <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@(context.ImageSource)" Class="mt-1 rounded-lg" />
                             </ChildContent>
                             <TooltipContent>
-                                <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                                <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@(context.ImageSource)" />
                             </TooltipContent>
                         </MudTooltip>
                     }
@@ -81,15 +81,18 @@
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Image)])">
-                    <MudFileUpload T="IBrowserFile" Accept=".jpg, .jpeg, .png" FilesChanged="file => UploadFileAsync (file, context)">
+                    <MudFileUpload T="IBrowserFile" Accept=".jpg,.jpeg,.png,.gif,.svg,.webp" title=""
+                        Hidden="@false" OnFilesChanged="OnInputFileChanged"
+                        @ondrop="@ClearDropArea" @ondragenter="@OnHover" @ondragleave="@ClearDropArea" @ondragend="@ClearDropArea"
+                        InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10" InputStyle="opacity: 0;">
                         <ActivatorContent>
-                            <MudButton Color="Color.Tertiary" Disabled="@(isUploading)" Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Filled.CloudUpload">
+                            <MudPaper Height="86px" Width="86px" Elevation="0" Class="@_dropAreaClass">
                                 @if (context.Image is null) {
-                                    @("Image")
+                                    <MudText Align="Align.Center" Typo="Typo.button">Upload Image</MudText>
                                 } else {
-                                    <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (context.Image)}")" />
+                                    <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@(context.ImageSource)" Class="rounded-lg" />
                                 }
-                            </MudButton>
+                            </MudPaper>
                         </ActivatorContent>
                     </MudFileUpload>
                     @if (context.Image is not null) {
@@ -178,14 +181,16 @@
     protected bool isUploading = false;
 
     /// <summary>画像のアップロード</summary>
-    protected async void UploadFileAsync(IBrowserFile file, Product item) {
-        if (isUploading || file is null) { return; }
+    protected async Task<bool> UploadFileAsync(IBrowserFile file) {
+        var success = false;
+        if (isUploading || file is null) { return success; }
         isUploading = true;
         try {
             using (var fs = file.OpenReadStream(MAX_ALLOWED_IMAGE_SIZE))
             using (var ms = new MemoryStream()) {
                 await fs.CopyToAsync(ms);
-                item.Image = ms.ToArray();
+                selectedItem.Image = ms.ToArray();
+                success = true;
             }
         }
         catch (System.IO.IOException ex) {
@@ -196,9 +201,38 @@
             }
         }
         isUploading = false;
-        StateHasChanged ();
-        return;
+        return success;
     }
+
+    /// <summary>ドロップ対象の基礎</summary>
+    protected const string BaseDropAreaClass = "relative rounded-lg pa-0 border-2 border-dashed d-flex align-center justify-center mud-width-full mud-height-full";
+    /// <summary>ドロップ対象の通常時</summary>
+    protected const string DefaultDropAreaClass = $"{BaseDropAreaClass} mud-border-lines-default";
+    /// <summary>ドロップ対象の侵入中</summary>
+    protected const string HoveredDropAreaClass = $"{BaseDropAreaClass} mud-border-tertiary";
+    /// <summary>ドロップ対象クラス参照</summary>
+    protected string _dropAreaClass = DefaultDropAreaClass;
+
+    /// <summary>ファイルの入力があった</summary>
+    protected async Task OnInputFileChanged (InputFileChangeEventArgs e) {
+        ClearDropArea ();
+        var files = e.GetMultipleFiles ();
+        if (files is not null && files.Count > 0) {
+            foreach (var file in files) {
+                if (await UploadFileAsync (file)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /// <summary>ドロップ対象に侵入した</summary>
+    protected void OnHover ()
+        => _dropAreaClass = HoveredDropAreaClass;
+
+    /// <summary>ドロップ対象から外れた</summary>
+    protected void ClearDropArea ()
+        => _dropAreaClass = DefaultDropAreaClass;
 
     /// <summary>画像の抹消</summary>
     protected void DeleteFile (Product item) {

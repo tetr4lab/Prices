@@ -60,10 +60,10 @@
                     @if (product?.Image is not null) {
                         <MudTooltip Color="Color.Transparent" Duration="1000" Delay="1000">
                             <ChildContent>
-                                <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                <MudImage Width="48" Height="48" ObjectFit="ObjectFit.Cover" Src="@(product.ImageSource)" Class="mt-1 rounded-lg" />
                             </ChildContent>
                             <TooltipContent>
-                                <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@($"data:image/jpeg;base64,{Convert.ToBase64String (product.Image)}")" />
+                                <MudImage Elevation="5" Width="480" ObjectFit="ObjectFit.Cover" Src="@(product.ImageSource)" />
                             </TooltipContent>
                         </MudTooltip>
                     }
