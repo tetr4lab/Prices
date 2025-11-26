@@ -32,20 +32,11 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     /// <summary>セクションラベル設定</summary>
     [CascadingParameter (Name = "Section")] protected EventCallback<string> SetSectionTitle { get; set; }
 
-    /// <summary>認証状況を得る</summary>
-    [CascadingParameter] protected Task<AuthenticationState> AuthState { get; set; } = default!;
-
     /// <summary>項目一覧</summary>
     protected List<T>? items => DataSet.IsReady ? DataSet.GetList<T> () : null;
 
     /// <summary>選択項目</summary>
     protected T selectedItem { get; set; } = new ();
-
-    /// <summary>認証済みID</summary>
-    protected AuthedIdentity? Identity { get; set; }
-
-    /// <summary>ユーザ識別子</summary>
-    protected string UserIdentifier => Identity?.Identifier ?? "unknown";
 
     /// <summary>アプリモードが変化した</summary>
     protected void OnAppModePropertyChanged (object? sender, PropertyChangedEventArgs e) {
@@ -58,17 +49,12 @@ public class ItemListBase<T> : PricesComponentBase, IDisposable where T : Prices
     protected override async Task OnInitializedAsync () {
         await base.OnInitializedAsync ();
         await SetSectionTitle.InvokeAsync ($"{typeof (T).Name}s");
-        // 購読開始
-        AppModeService.PropertyChanged += OnAppModePropertyChanged;
-        // 認証・認可
-        Identity = await AuthState.GetIdentityAsync ();
         newItem = NewEditItem;
     }
 
     /// <summary>破棄</summary>
-    public void Dispose () {
-        // 購読終了
-        AppModeService.PropertyChanged -= OnAppModePropertyChanged;
+    public override void Dispose () {
+        base.Dispose ();
         if (editingItem != null) {
             Cancel (editingItem);
         }
