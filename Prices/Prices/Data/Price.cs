@@ -74,8 +74,8 @@ FROM (
     [Column ("product_id"), Required] public long ProductId { get; set; } = 0;
     [Column ("store_id"), Required] public long StoreId { get; set; } = 0;
     [Column ("confirmed")] public DateTime? Confirmed { get; set; } = null;
-    [Column ("too_old_confirm"), VirtualColumn] public int TooOld { get; set; }
-    [Column ("is_new_product"), VirtualColumn] public int Lowest { get; set; }
+    [ResultColumn ("too_old_confirm")] public int TooOld { get; set; }
+    [ResultColumn ("is_new_product")] public int Lowest { get; set; }
 
     /// <summary>製品</summary>
     public Product? Product (PricesDataSet set) => set.Products.Find (i => i.Id == ProductId);
