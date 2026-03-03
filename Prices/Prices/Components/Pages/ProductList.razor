@@ -81,11 +81,12 @@
                     <MudTextField Margin="Margin.None" Typo="Typo.body2" T="string" @bind-Value="context.Name" Required />
                 </MudTd>
                 <MudTd DataLabel="@(Product.Label[nameof(Product.Image)])">
+                    <style>.mud-input-opacity0 { opacity: 0; }</style>
                     <MudFileUpload T="IBrowserFile" Accept=".jpg,.jpeg,.png,.gif,.svg,.webp" title=""
                         Hidden="@false" OnFilesChanged="OnInputFileChanged"
                         @ondrop="@ClearDropArea" @ondragenter="@OnHover" @ondragleave="@ClearDropArea" @ondragend="@ClearDropArea"
-                        InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10" InputStyle="opacity: 0;">
-                        <ActivatorContent>
+                        InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10 mud-input-opacity0">
+                        <CustomContent Context="MudFileUpload">
                             <MudPaper Height="86px" Width="86px" Elevation="0" Class="@_dropAreaClass">
                                 @if (context.Image is null) {
                                     <MudText Align="Align.Center" Typo="Typo.button">Upload Image</MudText>
@@ -93,7 +94,8 @@
                                     <MudImage Width="80" Height="80" ObjectFit="ObjectFit.Cover" Src="@(context.ImageSource)" Class="rounded-lg" />
                                 }
                             </MudPaper>
-                        </ActivatorContent>
+                        </CustomContent>
+                        <SelectedTemplate Context="MudFileUpload" />
                     </MudFileUpload>
                     @if (context.Image is not null) {
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => DeleteFile (context)" />
