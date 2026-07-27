@@ -4,7 +4,9 @@ using MudBlazor.Services;
 using PetaPoco;
 using Prices.Components;
 using Prices.Services;
-using Tetr4lab;
+using Tetr4lab.Auth;
+using Tetr4lab.Razor;
+using Tetr4lab.Server;
 using System.Globalization;
 using Prices.Components.Pages;
 

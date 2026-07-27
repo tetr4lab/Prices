@@ -3,7 +3,7 @@ using PetaPoco;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Reflection;
-using Tetr4lab;
+using Tetr4lab.Db;
 
 namespace Prices.Data;
 

@@ -5,6 +5,8 @@ using MySqlConnector;
 using PetaPoco;
 using Prices.Data;
 using Tetr4lab;
+using Tetr4lab.Db;
+using Tetr4lab.Db.MySql;
 
 namespace Prices.Services;
 

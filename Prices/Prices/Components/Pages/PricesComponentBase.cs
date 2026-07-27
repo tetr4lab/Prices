@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Tetr4lab;
+using Tetr4lab.Auth;
+using Tetr4lab.Razor;
 
 namespace Prices.Components.Pages;
 
