@@ -10,13 +10,16 @@ using Tetr4lab.Server;
 using System.Globalization;
 using Prices.Components.Pages;
 
+System.Text.Encoding.RegisterProvider (System.Text.CodePagesEncodingProvider.Instance);
+
 var builder = WebApplication.CreateBuilder (args);
 var connectionString = $"database=prices;{builder.Configuration.GetConnectionString ("Host")}{builder.Configuration.GetConnectionString ("Account")}Allow User Variables=true;";
 
 // Add services to the container.
 builder.Services.AddRazorComponents ()
     .AddInteractiveServerComponents ()
-    .AddInteractiveWebAssemblyComponents ();
+    .AddHubOptions (options => options.MaximumReceiveMessageSize = 64 * 1024) // 受信サイズ最大64KB(デフォルト32KB)
+    ;
 
 // MudBlazor
 builder.Services.AddMudServices (config => {
@@ -25,8 +28,8 @@ builder.Services.AddMudServices (config => {
     config.SnackbarConfiguration.NewestOnTop = false;
     config.SnackbarConfiguration.ShowCloseIcon = true;
     config.SnackbarConfiguration.VisibleStateDuration = 10000;
-    config.SnackbarConfiguration.HideTransitionDuration = 500;
-    config.SnackbarConfiguration.ShowTransitionDuration = 500;
+    config.SnackbarConfiguration.HideTransitionDuration = 1000;
+    config.SnackbarConfiguration.ShowTransitionDuration = 1000;
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
     config.SnackbarConfiguration.MaximumOpacity = 80;
 });
@@ -46,10 +49,11 @@ await builder.Services.AddAuthorizationAsync (
     }
 );
 
-#if NET8_0_OR_GREATER
 // ページにカスケーディングパラメータ`Task<AuthenticationState>`を提供
 builder.Services.AddCascadingAuthenticationState ();
-#endif
+
+// 認証状態
+builder.Services.AddScoped<AuthStateProvider> ();
 
 // UIロック状態
 builder.Services.AddScoped<IAppLockState, AppLockState> ();
@@ -62,9 +66,6 @@ builder.Services.AddScoped<CircuitHandler, CircuitClosureDetector> ();
 
 // PetaPoco with MySqlConnector
 builder.Services.AddScoped (_ => (Database) new MySqlDatabase (connectionString, "MySqlConnector"));
-
-// HTTP Client
-builder.Services.AddHttpClient ();
 
 // DataSet
 builder.Services.AddScoped<PricesDataSet> ();
@@ -103,9 +104,7 @@ app.UseAuthorization ();
 
 app.MapStaticAssets ();
 app.MapRazorComponents<App> ()
-    .AddInteractiveServerRenderMode ()
-    .AddInteractiveWebAssemblyRenderMode ()
-    .AddAdditionalAssemblies (typeof (Prices.Client._Imports).Assembly);
+    .AddInteractiveServerRenderMode ();
 
 System.Diagnostics.Debug.WriteLine ("Initialized");
 app.Run ();
